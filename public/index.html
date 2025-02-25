@@ -35,7 +35,7 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
-    #uploadSection {
+    #uploadSection, #deleteSection {
       margin-top: 20px;
     }
     #responseSection {
@@ -49,14 +49,23 @@
 <body>
   <h1>Control de Linterna y Cámara</h1>
 
-  <!-- Botón para encender la linterna -->
+  <!-- Botones para la linterna -->
   <button id="encenderLinternaBtn">Encender Linterna</button>
-
-  <!-- Botón para apagar la linterna -->
   <button id="apagarLinternaBtn">Apagar Linterna</button>
 
   <!-- Botón para tomar una foto -->
   <button id="tomarFotoBtn">Tomar Foto</button>
+
+  <!-- Botones para huella (enviados a @gaa) -->
+  <button id="capturarHuellaBtn">Capturar Huella</button>
+  <button id="verificarHuellaBtn">Verificar Huella</button>
+  <button id="eliminarHuellaBtn">Eliminar Huella</button>
+
+  <!-- Sección para ingresar el ID al eliminar huella -->
+  <div id="deleteSection">
+    <input type="number" id="idInput" placeholder="ID (1-127)" min="1" max="127">
+    <button id="confirmarEliminarBtn">Confirmar</button>
+  </div>
 
   <!-- Sección para cargar una imagen -->
   <div id="uploadSection">
@@ -67,27 +76,25 @@
   <!-- Botón para ver la última imagen -->
   <button id="verImagenBtn">Ver Última Imagen</button>
 
-  <!-- Sección para mostrar la respuesta de la carga de la imagen -->
+  <!-- Sección para mostrar la respuesta del servidor -->
   <div id="responseSection">
     <h3>Respuesta del Servidor:</h3>
     <pre id="responseJson"></pre>
-    <div id="imageContainer"></div> <!-- Aquí se mostrará la imagen subida -->
+    <div id="imageContainer"></div>
   </div>
 
   <script>
-    // Función para enviar mensajes al servidor
-    async function sendMessage(command) {
+    // Función para enviar mensajes al servidor con destinatario opcional
+    async function sendMessage(command, targetUsername = '@Mibotcamara_bot') {
       try {
         const response = await fetch("/send-message", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ command }), // Envía el comando al servidor
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command, targetUsername }),
         });
 
         if (response.ok) {
-          alert(`Comando "${command}" enviado correctamente.`);
+          alert(`Comando "${command}" enviado a "${targetUsername}" correctamente.`);
         } else {
           alert(`Error al enviar el comando "${command}".`);
         }
@@ -97,19 +104,39 @@
       }
     }
 
-    // Evento para encender la linterna
+    // Eventos para los botones principales
     document.getElementById("encenderLinternaBtn").addEventListener("click", () => {
       sendMessage("/activar_flash");
     });
 
-    // Evento para apagar la linterna
     document.getElementById("apagarLinternaBtn").addEventListener("click", () => {
       sendMessage("/desactivar_flash");
     });
 
-    // Evento para tomar una foto
     document.getElementById("tomarFotoBtn").addEventListener("click", () => {
       sendMessage("/tomar_foto");
+    });
+
+    // Enviar comandos de huella a @gaa
+    document.getElementById("capturarHuellaBtn").addEventListener("click", () => {
+      sendMessage("/capturar_huella", "@Grupotwobot");
+    });
+
+    document.getElementById("verificarHuellaBtn").addEventListener("click", () => {
+      sendMessage("/verificar_huella", "@Grupotwobot");
+    });
+
+    document.getElementById("eliminarHuellaBtn").addEventListener("click", () => {
+      alert("Introduce el ID y presiona 'Confirmar'.");
+    });
+
+    document.getElementById("confirmarEliminarBtn").addEventListener("click", () => {
+      const id = document.getElementById("idInput").value;
+      if (id >= 1 && id <= 127) {
+        sendMessage(`/eliminar_huella ${id}`, "@Grupotwobot");
+      } else {
+        alert("Por favor, ingresa un ID válido (1-127).");
+      }
     });
 
     // Función para subir la imagen
@@ -118,14 +145,11 @@
       formData.append("image", file);
 
       try {
-        const response = await fetch("/upload", {
-          method: "POST",
-          body: formData,
-        });
-
+        const response = await fetch("/upload", { method: "POST", body: formData });
         const data = await response.json();
+
         if (response.ok) {
-          displayResponse(data);  // Muestra la respuesta en el frontend
+          displayResponse(data);
         } else {
           alert(`Error al subir la imagen: ${data.message}`);
         }
@@ -139,8 +163,7 @@
     document.getElementById("uploadBtn").addEventListener("click", () => {
       const fileInput = document.getElementById("fileInput");
       if (fileInput.files.length > 0) {
-        const file = fileInput.files[0];
-        uploadImage(file);  // Subir la imagen seleccionada
+        uploadImage(fileInput.files[0]);
       } else {
         alert("Por favor, selecciona una imagen.");
       }
@@ -148,15 +171,14 @@
 
     // Función para mostrar la respuesta del servidor
     function displayResponse(data) {
-      const responseJson = document.getElementById("responseJson");
-      responseJson.textContent = JSON.stringify(data, null, 2); // Muestra el JSON de forma legible
+      document.getElementById("responseJson").textContent = JSON.stringify(data, null, 2);
 
-      // Opcional: Mostrar la imagen en la página
       if (data.url) {
         const imageContainer = document.getElementById("imageContainer");
         const img = document.createElement("img");
         img.src = data.url;
-        imageContainer.appendChild(img);  // Agrega la imagen al contenedor
+        imageContainer.innerHTML = ''; // Limpiar contenedor antes de agregar la imagen
+        imageContainer.appendChild(img);
       }
     }
 
@@ -165,17 +187,13 @@
       try {
         const response = await fetch("/last-image");
         const data = await response.json();
-        
+
         if (response.ok && data.url) {
           const imageContainer = document.getElementById("imageContainer");
-
-          // Limpiar el contenedor de imágenes antes de agregar la nueva
           imageContainer.innerHTML = '';
-
-          // Crear y agregar la nueva imagen al contenedor
           const img = document.createElement("img");
           img.src = data.url;
-          imageContainer.appendChild(img);  // Muestra la última imagen
+          imageContainer.appendChild(img);
         } else {
           console.log("No hay imágenes cargadas.");
         }
@@ -184,12 +202,12 @@
       }
     }
 
-    // Evento para manejar el botón de "Ver Última Imagen"
+    // Evento para manejar el botón "Ver Última Imagen"
     document.getElementById("verImagenBtn").addEventListener("click", () => {
-      getLastImage();  // Llama a la función para mostrar la última imagen
+      getLastImage();
     });
 
-    // Llamar a la función para obtener la última imagen al cargar la página
+    // Cargar la última imagen al iniciar la página
     window.onload = getLastImage;
   </script>
 </body>
