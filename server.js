@@ -74,25 +74,22 @@ const client = new CreateClient(
 // Ruta para enviar el mensaje al bot de Telegram
 app.post('/send-message', async (req, res) => {
   try {
-    const { command } = req.body; // Obtén el comando desde el frontend
+    const { command, targetUsername = '@Mibotcamara_bot' } = req.body; // Obtiene destinatario opcional
 
     if (!command) {
       return res.status(400).json({ success: false, error: 'Comando no proporcionado.' });
     }
 
-    const targetUsername = '@Mibotcamara_bot'; // Nombre de usuario del bot
+    // Enviar mensaje al destinatario definido
+    await client.sendMessage(targetUsername, { message: command });
 
-    // Envía el comando al bot de Telegram
-    await client.sendMessage(targetUsername, {
-      message: command, // Envía el comando como mensaje
-    });
-
-    res.status(200).json({ success: true, message: `Comando "${command}" enviado correctamente.` });
+    res.status(200).json({ success: true, message: `Comando "${command}" enviado a "${targetUsername}" correctamente.` });
   } catch (error) {
     console.error('Error al enviar el mensaje:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
+
 
 // Ruta para cargar imágenes a Cloudinary
 app.post('/upload', upload.single('image'), (req, res) => {
