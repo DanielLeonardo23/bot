@@ -35,6 +35,15 @@
       border-radius: 10px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
+    #uploadSection {
+      margin-top: 20px;
+    }
+    #responseSection {
+      margin-top: 20px;
+      border: 1px solid #ddd;
+      padding: 20px;
+      background-color: #f9f9f9;
+    }
   </style>
 </head>
 <body>
@@ -49,11 +58,21 @@
   <!-- Botón para tomar una foto -->
   <button id="tomarFotoBtn">Tomar Foto</button>
 
-  <!-- Botón para obtener fotos recibidas -->
-  <button id="obtenerFotosBtn">Obtener Fotos Recibidas</button>
+  <!-- Sección para cargar una imagen -->
+  <div id="uploadSection">
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadBtn">Subir Imagen</button>
+  </div>
 
-  <!-- Contenedor para mostrar las fotos recibidas -->
-  <div id="imageContainer"></div>
+  <!-- Botón para ver la última imagen -->
+  <button id="verImagenBtn">Ver Última Imagen</button>
+
+  <!-- Sección para mostrar la respuesta de la carga de la imagen -->
+  <div id="responseSection">
+    <h3>Respuesta del Servidor:</h3>
+    <pre id="responseJson"></pre>
+    <div id="imageContainer"></div> <!-- Aquí se mostrará la imagen subida -->
+  </div>
 
   <script>
     // Función para enviar mensajes al servidor
@@ -78,32 +97,6 @@
       }
     }
 
-    // Función para obtener y mostrar las fotos recibidas
-    async function getReceivedImages() {
-      try {
-        const response = await fetch("/get-image-urls");
-        const data = await response.json();
-
-        if (data.success) {
-          const imageContainer = document.getElementById("imageContainer");
-          imageContainer.innerHTML = ""; // Limpiar el contenedor
-
-          data.imageUrls.forEach((url) => {
-            const img = document.createElement("img");
-            img.src = url;
-            img.style.width = "200px";
-            img.style.margin = "10px";
-            imageContainer.appendChild(img);
-          });
-        } else {
-          alert("Error al obtener las fotos.");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error al obtener las fotos.");
-      }
-    }
-
     // Evento para encender la linterna
     document.getElementById("encenderLinternaBtn").addEventListener("click", () => {
       sendMessage("/activar_flash");
@@ -119,10 +112,85 @@
       sendMessage("/tomar_foto");
     });
 
-    // Evento para obtener fotos recibidas
-    document.getElementById("obtenerFotosBtn").addEventListener("click", () => {
-      getReceivedImages();
+    // Función para subir la imagen
+    async function uploadImage(file) {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      try {
+        const response = await fetch("/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+          displayResponse(data);  // Muestra la respuesta en el frontend
+        } else {
+          alert(`Error al subir la imagen: ${data.message}`);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Error al subir la imagen.");
+      }
+    }
+
+    // Evento para manejar la carga de archivos
+    document.getElementById("uploadBtn").addEventListener("click", () => {
+      const fileInput = document.getElementById("fileInput");
+      if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        uploadImage(file);  // Subir la imagen seleccionada
+      } else {
+        alert("Por favor, selecciona una imagen.");
+      }
     });
+
+    // Función para mostrar la respuesta del servidor
+    function displayResponse(data) {
+      const responseJson = document.getElementById("responseJson");
+      responseJson.textContent = JSON.stringify(data, null, 2); // Muestra el JSON de forma legible
+
+      // Opcional: Mostrar la imagen en la página
+      if (data.url) {
+        const imageContainer = document.getElementById("imageContainer");
+        const img = document.createElement("img");
+        img.src = data.url;
+        imageContainer.appendChild(img);  // Agrega la imagen al contenedor
+      }
+    }
+
+    // Función para obtener la última imagen cargada
+    async function getLastImage() {
+      try {
+        const response = await fetch("/last-image");
+        const data = await response.json();
+        
+        if (response.ok && data.url) {
+          const imageContainer = document.getElementById("imageContainer");
+
+          // Limpiar el contenedor de imágenes antes de agregar la nueva
+          imageContainer.innerHTML = '';
+
+          // Crear y agregar la nueva imagen al contenedor
+          const img = document.createElement("img");
+          img.src = data.url;
+          imageContainer.appendChild(img);  // Muestra la última imagen
+        } else {
+          console.log("No hay imágenes cargadas.");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    }
+
+    // Evento para manejar el botón de "Ver Última Imagen"
+    document.getElementById("verImagenBtn").addEventListener("click", () => {
+      getLastImage();  // Llama a la función para mostrar la última imagen
+    });
+
+    // Llamar a la función para obtener la última imagen al cargar la página
+    window.onload = getLastImage;
   </script>
 </body>
 </html>
