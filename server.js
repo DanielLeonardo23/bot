@@ -290,7 +290,7 @@ app.post('/login', async (req, res) => {
   }
 });
 
-router.get('/usuarios', async (req, res) => {
+app.get('/usuarios', async (req, res) => {
   try {
     const result = await client.query('SELECT * FROM usuarios');
     res.status(200).json(result.rows);
