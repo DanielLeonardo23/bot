@@ -18,16 +18,69 @@ async function sendMessage(command, targetUsername = '@Grupotwobot') {
     }
   }
   
-  // Función para capturar huella
+  // Función para mostrar un símbolo de "cargando"
+function showLoadingStatus(statusElement) {
+  statusElement.innerHTML = '<span class="loading">Cargando...</span>';  // Aquí podrías poner un spinner o icono de carga
+}
+
+// Función para mostrar un símbolo de "registrado"
+function showCompletedStatus(statusElement, actionType) {
+  if (actionType === 'huella') {
+    statusElement.innerHTML = '<span class="success">Huella registrada</span>';  // Marca de verificación
+  } else if (actionType === 'foto') {
+    statusElement.innerHTML = '<span class="success">Foto cargada</span>';  // Marca de verificación
+  }
+}
+
+  // Función para manejar la captura de huella
   document.getElementById("capturarHuellaBtn").addEventListener("click", () => {
     sendMessage("/registrarhuella", "@Grupotwobot");
+    const huellaStatus = document.getElementById("huellaStatus");
+
+    // Mostrar el símbolo de "cargando"
+    showLoadingStatus(huellaStatus);
+
+    // Simular un retraso de 5 segundos (5000 ms)
+    setTimeout(() => {
+      // Mostrar el símbolo de "registrado"
+      showCompletedStatus(huellaStatus, 'huella');
+    }, 5000);
+
+    // Cargar la última imagen y usuario solo cuando se presione este botón
+    
+    loadUserData();
   });
+// Función para manejar la toma de foto
+document.getElementById("tomarFotoBtn").addEventListener("click", () => {
+  const fotoStatus = document.getElementById("fotoStatus");
+
+  // Mostrar el símbolo de "cargando"
+  showLoadingStatus(fotoStatus);
+
+  // Simular un retraso de 5 segundos (5000 ms)
+  setTimeout(() => {
+    // Cargar la última imagen solo cuando se presione este botón
+    loadImageData();
+    // Mostrar el símbolo de "registrado"
+    showCompletedStatus(fotoStatus, 'foto');
+
+  }, 5000);
+});
+
   
   // Función para tomar foto
   document.getElementById("tomarFotoBtn").addEventListener("click", () => {
     sendMessage("/tomar_foto", "@Mibotcamara_bot");
+     // Mostrar el símbolo de "cargando"
+     const fotoStatus = document.getElementById("fotoStatus");
+
+  showLoadingStatus(fotoStatus);
+    // Simular un retraso de 5 segundos (5000 ms)
+    setTimeout(() => {
+      // Mostrar el símbolo de "registrado"
+      showCompletedStatus(fotoStatus, 'foto');
+    }, 5000);
   });
-  
   // Función para registrar el usuario
   document.getElementById("registrarUsuarioBtn").addEventListener("click", async () => {
     const id_usuario = document.getElementById("id_usuario").value;
@@ -85,7 +138,18 @@ async function sendMessage(command, targetUsername = '@Grupotwobot') {
       console.error("Error al cargar la imagen:", error);
     }
   }
-  
+  // Función para mostrar un símbolo de "cargando"
+function showLoadingStatus(statusElement) {
+  statusElement.innerHTML = '<span class="loading">Cargando...</span>';  // Aquí podrías poner un spinner o icono de carga
+}
+// Función para mostrar un símbolo de "registrado"
+function showCompletedStatus(statusElement, actionType) {
+  if (actionType === 'huella') {
+    statusElement.innerHTML = '<span class="success">Huella registrada</span>';  // Marca de verificación
+  } else if (actionType === 'foto') {
+    statusElement.innerHTML = '<span class="success">Foto cargada</span>';  // Marca de verificación
+  }
+}
   // Función para cargar el último usuario registrado
   async function loadUserData() {
     try {
@@ -102,8 +166,5 @@ async function sendMessage(command, targetUsername = '@Grupotwobot') {
     }
   }
   
-  window.onload = () => {
-    loadImageData();
-    loadUserData();
-  };
+ 
   

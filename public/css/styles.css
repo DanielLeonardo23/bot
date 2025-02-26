@@ -1,49 +1,123 @@
+/* Fuente y estilo base */
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin-top: 50px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    margin: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border: none;
-    border-radius: 5px;
-    background-color: #007bff;
-    color: white;
-  }
-  
-  button:hover {
-    background-color: #0056b3;
-  }
-  
-  #formContainer {
-    margin-top: 20px;
-    display: inline-block;
-    text-align: left;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: #f9f9f9;
-  }
-  
-  input {
-    padding: 10px;
-    width: 100%;
-    margin: 5px 0;
-    border-radius: 5px;
-    border: 1px solid #ccc;
-  }
-  
-  #imagePreview img {
-    max-width: 200px;
-    margin-top: 10px;
-  }
-  
-  #capturarHuellaBtn, #tomarFotoBtn {
-    display: block;
-    margin: 10px auto;
-  }
-  
+  font-family: 'Roboto', sans-serif;
+  text-align: center;
+  margin-top: 10px;
+  background-color: #f4f7fc;
+  color: #333;
+}
+
+h1 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 30px;
+}
+
+/* Contenedor del formulario */
+#formContainer {
+  margin-top: 20px;
+  display: inline-block;
+  text-align: left;
+  padding: 60px;
+  border-radius: 12px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  border: 0.5px solid #ddd;
+}
+
+/* Botones */
+button {
+  padding: 12px 20px;
+  margin: 10px 0;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 8px;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+button i {
+  margin-right: 8px;
+}
+
+/* Campos de entrada */
+input {
+  padding: 12px;
+  width: 100%;
+  margin: 10px 0;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+}
+
+input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+/* Estado y carga */
+.status {
+  margin: 10px 0;
+  font-size: 14px;
+}
+
+.loading {
+  font-size: 16px;
+  color: #f39c12;
+}
+
+.success {
+  color: #2ecc71;
+  font-weight: bold;
+}
+
+#huellaStatus, #fotoStatus {
+  font-size: 16px;
+}
+
+#imagePreview img {
+  max-width: 200px;
+  margin-top: 10px;
+  border-radius: 5px;
+}
+
+/* Añadir iconos y efectos */
+button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button i {
+  font-size: 18px;
+}
+
+/* Contenedor de íconos */
+#capturarHuellaBtn, #tomarFotoBtn {
+  display: block;
+  margin: 10px auto;
+  padding: 12px 24px;
+}
+
+/* Efectos de carga con spinner */
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
