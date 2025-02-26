@@ -106,8 +106,8 @@ app.post('/send-message', async (req, res) => {
   }
 });
 
-// Ruta para cargar imágenes a Cloudinary
-app.post('/upload', upload.single('image'), (req, res) => {
+// Ruta para cargar imágenes a Cloudinary y guardar la URL en la base de datos
+app.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: 'No file uploaded.' });
   }
@@ -118,64 +118,93 @@ app.post('/upload', upload.single('image'), (req, res) => {
       resource_type: 'auto',  // Detecta automáticamente el tipo de archivo (imagen, video, etc.)
       folder: 'uploads/',  // Especificamos que queremos guardar en la carpeta "uploads"
     },
-    (error, result) => {
+    async (error, result) => {
       if (error) {
         return res.status(500).json({ error: 'Error uploading image.' });
       }
 
-      // Guardar el enlace en un archivo de texto
+      // Obtener la URL de la imagen subida
       const imageUrl = result.secure_url;
-      fs.appendFile('image-urls.txt', `${imageUrl}\n`, (err) => {
-        if (err) {
-          console.error('Error saving the URL:', err);
-        } else {
-          console.log('URL saved successfully.');
-        }
-      });
 
-      // Respondemos con la URL de la imagen subida
-      res.json({
-        message: 'Image uploaded successfully',
-        filename: result.public_id,  // public_id de la imagen subida
-        url: imageUrl,  // URL de la imagen subida
-      });
+      // Insertar la URL en la base de datos
+      try {
+        const query = 'INSERT INTO imagenes (id_imagen, link_imagen) VALUES ($1, $2) RETURNING *;';
+        const imageId = result.public_id;  // Usamos el public_id de Cloudinary como id_imagen
+
+        await clientDB.query(query, [imageId, imageUrl]);
+        console.log('URL de la imagen guardada en la base de datos');
+
+        // Responder con la URL de la imagen subida
+        res.json({
+          message: 'Image uploaded and URL saved to database successfully',
+          filename: result.public_id,  // public_id de la imagen subida
+          url: imageUrl,  // URL de la imagen subida
+        });
+      } catch (dbError) {
+        console.error('Error al guardar la URL en la base de datos:', dbError);
+        res.status(500).json({ error: 'Error al guardar la URL en la base de datos.' });
+      }
     }
   ).end(req.file.buffer);  // Usamos el archivo desde la memoria
 });
 
-// Ruta para obtener la última URL de la imagen cargada
-app.get('/last-image', (req, res) => {
-  fs.readFile('image-urls.txt', 'utf8', (err, data) => {
-    if (err) {
-      return res.status(500).json({ error: 'Error al leer el archivo de imágenes.' });
-    }
-    const urls = data.trim().split('\n');
-    const lastUrl = urls[urls.length - 1]; // Obtener la última URL
-    if (lastUrl) {
-      res.json({ url: lastUrl });
+
+
+// Ruta para obtener la última imagen
+app.get('/last-image', async (req, res) => {
+  try {
+    // Consulta SQL para obtener la última imagen registrada en la tabla 'imagenes'
+    const query = 'SELECT link_imagen, id_imagen FROM imagenes ORDER BY id_imagen DESC LIMIT 1';
+    const result = await clientDB.query(query);
+
+    if (result.rows.length > 0) {
+      // Obtener la URL y el ID de la imagen
+      const { link_imagen, id_imagen } = result.rows[0];
+      res.json({ url: link_imagen, filename: id_imagen });
     } else {
-      res.status(404).json({ error: 'No hay imágenes cargadas.' });
+      res.status(404).json({ error: 'No hay imágenes cargadas en la base de datos.' });
     }
-  });
+  } catch (err) {
+    console.error('Error al obtener la última imagen:', err);
+    res.status(500).json({ error: 'Error al obtener la última imagen' });
+  }
+});
+
+// Ruta para obtener el último usuario registrado
+app.get('/last-user', async (req, res) => {
+  try {
+    // Consulta SQL para obtener el último usuario registrado en la tabla 'usuarios'
+    const query = 'SELECT id_usuario, nombre, id_huella FROM usuarios ORDER BY id_usuario DESC LIMIT 1';
+    const result = await clientDB.query(query);
+
+    if (result.rows.length > 0) {
+      // Obtener los detalles del último usuario registrado
+      const { id_usuario, nombre, id_huella } = result.rows[0];
+      res.json({ id_usuario, nombre, id_huella });
+    } else {
+      res.status(404).json({ error: 'No hay usuarios registrados en la base de datos.' });
+    }
+  } catch (err) {
+    console.error('Error al obtener el último usuario:', err);
+    res.status(500).json({ error: 'Error al obtener el último usuario' });
+  }
 });
 
 app.post('/register-user', async (req, res) => {
-  const { name, fingerprintId } = req.body;
+  const { id_usuario, nombres, id_huella, link_imagen, id_imagen } = req.body;
 
   try {
-    // Consulta SQL para insertar un nuevo registro de huella en la base de datos
-    const query = `
-      INSERT INTO usuarios (id_usuario, nombre, id_huella)
-      VALUES ($1, $2, $3) RETURNING *;
-    `;
+    // Insertar los datos directamente en la tabla 'userimg' (solo Telegram)
+    const queryUserImg = 'INSERT INTO userimg (id_usuario, nombre, id_huella, link_imagen, id_imagen) VALUES ($1, $2, $3, $4, $5)';
+    const result = await clientDB.query(queryUserImg, [id_usuario, nombres, id_huella, link_imagen, id_imagen]);
 
-    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
-    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente en userimg.' });
   } catch (err) {
-    console.error('Error al insertar en la base de datos:', err);
-    res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
+    console.error('Error al registrar el usuario en userimg:', err);
+    res.status(500).json({ success: false, message: 'Error al registrar el usuario en userimg' });
   }
 });
+
 
 // Ruta para verificar una huella en la base de datos
 app.post('/verify-fingerprint', async (req, res) => {
