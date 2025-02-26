@@ -250,9 +250,7 @@ function showCompletedStatus(statusElement, actionType) {
       const result = await response.json();
   
       if (response.ok) {
-        // Guardar el token en el almacenamiento local
-        localStorage.setItem("token", result.token);
-        // Redirigir al dashboard
+        alert("Inicio de sesión exitoso.");
         window.location.href = "dashboard.html";
       } else {
         alert(`Error al iniciar sesión: ${result.message}`);
