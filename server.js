@@ -12,10 +12,10 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Cambia esta línea
 
 const clientDB = new Client({
-  connectionString: 'postgresql://dbsecurity_user:27PdSd9U8rvelKWnSmhR0MrN20M1uAsq@dpg-cuv3f2a3esus73bl48d0-a.oregon-postgres.render.com/dbsecurity',
+  connectionString: 'postgresql://dbsecurity_user:27PdSd9U8rvelKWnSmhR0MrN20M1uAsq@dpg-cuv3f2a3esus73bl48d0-a.oregon-postgres.render.com/dbsecurity?sslmode=require',
   ssl: {
     rejectUnauthorized: false,
   },
@@ -106,7 +106,6 @@ app.post('/send-message', async (req, res) => {
   }
 });
 
-
 // Ruta para cargar imágenes a Cloudinary
 app.post('/upload', upload.single('image'), (req, res) => {
   if (!req.file) {
@@ -143,39 +142,41 @@ app.post('/upload', upload.single('image'), (req, res) => {
     }
   ).end(req.file.buffer);  // Usamos el archivo desde la memoria
 });
+
 // Ruta para obtener la última URL de la imagen cargada
 app.get('/last-image', (req, res) => {
-    fs.readFile('image-urls.txt', 'utf8', (err, data) => {
-      if (err) {
-        return res.status(500).json({ error: 'Error al leer el archivo de imágenes.' });
-      }
-      const urls = data.trim().split('\n');
-      const lastUrl = urls[urls.length - 1]; // Obtener la última URL
-      if (lastUrl) {
-        res.json({ url: lastUrl });
-      } else {
-        res.status(404).json({ error: 'No hay imágenes cargadas.' });
-      }
-    });
-  });
-app.post('/register-user', async (req, res) => {
-    const { name, fingerprintId } = req.body;
-  
-    try {
-      // Consulta SQL para insertar un nuevo registro de huella en la base de datos
-      const query = `
-        INSERT INTO usuarios (id_usuario, nombre, id_huella)
-        VALUES ($1, $2, $3) RETURNING *;
-      `;
-  
-      const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
-      res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
-    } catch (err) {
-      console.error('Error al insertar en la base de datos:', err);
-      res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
+  fs.readFile('image-urls.txt', 'utf8', (err, data) => {
+    if (err) {
+      return res.status(500).json({ error: 'Error al leer el archivo de imágenes.' });
+    }
+    const urls = data.trim().split('\n');
+    const lastUrl = urls[urls.length - 1]; // Obtener la última URL
+    if (lastUrl) {
+      res.json({ url: lastUrl });
+    } else {
+      res.status(404).json({ error: 'No hay imágenes cargadas.' });
     }
   });
-  
+});
+
+app.post('/register-user', async (req, res) => {
+  const { name, fingerprintId } = req.body;
+
+  try {
+    // Consulta SQL para insertar un nuevo registro de huella en la base de datos
+    const query = `
+      INSERT INTO usuarios (id_usuario, nombre, id_huella)
+      VALUES ($1, $2, $3) RETURNING *;
+    `;
+
+    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err);
+    res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
+  }
+});
+
 // Ruta para verificar una huella en la base de datos
 app.post('/verify-fingerprint', async (req, res) => {
   const { fingerprintId } = req.body;
@@ -214,7 +215,6 @@ app.delete('/delete-fingerprint/:id', async (req, res) => {
   }
 });
 
-  
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
