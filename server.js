@@ -283,9 +283,6 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
     }
 
-    // Generar un token JWT
-    const token = jwt.sign({ id: user.id, username: user.username }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
     res.status(200).json({ success: true, message: 'Inicio de sesión exitoso', token });
   } catch (err) {
     console.error('Error al iniciar sesión:', err);
