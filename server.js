@@ -189,7 +189,7 @@ app.get('/last-user', async (req, res) => {
   }
 });
 
-app.post('/register-user', async (req, res) => {
+app.post('/register-user1', async (req, res) => {
   const { id_usuario, nombres, id_huella, link_imagen, id_imagen } = req.body;
 
   try {
@@ -201,6 +201,23 @@ app.post('/register-user', async (req, res) => {
   } catch (err) {
     console.error('Error al registrar el usuario en userimg:', err);
     res.status(500).json({ success: false, message: 'Error al registrar el usuario en userimg' });
+  }
+});
+app.post('/register-user', async (req, res) => {
+  const { name, fingerprintId } = req.body;
+
+  try {
+    // Consulta SQL para insertar un nuevo registro de huella en la base de datos
+    const query = `
+      INSERT INTO usuarios (id_usuario, nombre, id_huella)
+      VALUES ($1, $2, $3) RETURNING *;
+    `;
+
+    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err);
+    res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
   }
 });
 

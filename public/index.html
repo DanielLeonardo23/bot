@@ -3,45 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Registro de Usuario</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <title>Página de Inicio</title>
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>Registro de Usuario</h1>
+  <!-- Incluir el Navbar -->
+  <div id="navbar"></div>
 
-  <!-- Formulario de Registro -->
-  <div id="formContainer">
-    <!-- Botón para Capturar Huella -->
-    <button id="capturarHuellaBtn"><i class="fas fa-fingerprint"></i> Capturar Huella</button>
-    <div id="huellaStatus" class="status"></div>  <!-- Contenedor de estado de huella -->
-
-    <label for="id_usuario">ID de Usuario:</label>
-    <input type="text" id="id_usuario" placeholder="Ingrese el ID de usuario" required>
-    
-    <label for="nombres">Nombres:</label>
-    <input type="text" id="nombres" placeholder="Ingrese los nombres" required>
-    
-    <label for="id_huella">ID de Huella:</label>
-    <input type="text" id="id_huella" placeholder="Ingrese el ID de huella" required>
-
-    <div id="imagePreview"></div>
-
-    <!-- Botón para Tomar Foto -->
-    <button id="tomarFotoBtn"><i class="fas fa-camera"></i> Tomar Foto</button>
-    <div id="fotoStatus" class="status"></div>  <!-- Contenedor de estado de foto -->
-
-    <label for="link_imagen">Link de Imagen:</label>
-    <input type="text" id="link_imagen" placeholder="Link de la imagen" disabled>
-    
-    <label for="id_imagen">ID de Imagen:</label>
-    <input type="text" id="id_imagen" placeholder="ID de la imagen" disabled>
-
-    <!-- Botón para Registrar Usuario -->
-    <button id="registrarUsuarioBtn"><i class="fas fa-user-plus"></i> Registrar Usuario</button>
+  <div class="container">
+    <img src="img/logo.png" alt="Logo del Proyecto" class="logo">
+    <h1>Bienvenido al Sistema de Control de Acceso</h1>
+    <div class="images-container">
+      <img src="img/docente.png" alt="Imagen del Docente">
+      <img src="img/curso.png" alt="Imagen del Curso">
+    </div>
+    <a href="dashboard.html" class="btn">Ingresar</a>
   </div>
 
-  <script src="js/scripts.js"></script>
+  <script>
+    // Cargar Navbar
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => document.getElementById("navbar").innerHTML = data);
+  </script>
 </body>
 </html>

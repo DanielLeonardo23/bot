@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="navbar"></div>
+
+  <div class="dashboard-container">
+    <aside class="sidebar">
+      <ul>
+        <li><a href="registro.html"><i class="fas fa-user-plus"></i> Registro</a></li>
+        <li><a href="#"><i class="fas fa-cogs"></i> Configuración</a></li>
+      </ul>
+    </aside>
+
+    <main class="content">
+      <h2>Bienvenido al Panel</h2>
+      <p>Selecciona una opción en el menú lateral.</p>
+    </main>
+  </div>
+
+  <script>
+    fetch("navbar.html")
+      .then(response => response.text())
+      .then(data => document.getElementById("navbar").innerHTML = data);
+  </script>
+</body>
+</html>
