@@ -250,8 +250,9 @@ function showCompletedStatus(statusElement, actionType) {
       const result = await response.json();
   
       if (response.ok) {
+        console.log("TODO BIEN?")
         alert("Inicio de sesión exitoso.");
-        window.location.href = "dashboard.html";
+        window.location.href = "/dashboard.html";
       } else {
         alert(`Error al iniciar sesión: ${result.message}`);
       }
