@@ -283,7 +283,7 @@ app.post('/login', async (req, res) => {
       return res.status(400).json({ success: false, message: 'Contraseña incorrecta' });
     }
 
-    res.status(200).json({ success: true, message: 'Inicio de sesión exitoso', token });
+    res.status(200).json({ success: true, message: 'Inicio de sesión exitoso'});
   } catch (err) {
     console.error('Error al iniciar sesión:', err);
     res.status(500).json({ success: false, message: 'Error al iniciar sesión' });
