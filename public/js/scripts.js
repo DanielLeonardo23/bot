@@ -241,7 +241,7 @@ function showCompletedStatus(statusElement, actionType) {
     const password = document.getElementById("password").value;
   
     try {
-      const response = await fetch("/login", {
+      const response = await fetch("https://servidorfingerprinter.onrender.com/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
