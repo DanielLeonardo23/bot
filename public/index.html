@@ -119,11 +119,11 @@
 
     // Enviar comandos de huella a @gaa
     document.getElementById("capturarHuellaBtn").addEventListener("click", () => {
-      sendMessage("/capturar_huella", "@Grupotwobot");
+      sendMessage("/registrarhuella", "@Grupotwobot");
     });
 
     document.getElementById("verificarHuellaBtn").addEventListener("click", () => {
-      sendMessage("/verificar_huella", "@Grupotwobot");
+      sendMessage("/verificarhuella", "@Grupotwobot");
     });
 
     document.getElementById("eliminarHuellaBtn").addEventListener("click", () => {
@@ -133,7 +133,7 @@
     document.getElementById("confirmarEliminarBtn").addEventListener("click", () => {
       const id = document.getElementById("idInput").value;
       if (id >= 1 && id <= 127) {
-        sendMessage(`/eliminar_huella ${id}`, "@Grupotwobot");
+        sendMessage(`/eliminarhuella ${id}`, "@Grupotwobot");
       } else {
         alert("Por favor, ingresa un ID válido (1-127).");
       }
