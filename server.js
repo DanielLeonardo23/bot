@@ -290,6 +290,38 @@ app.post('/login', async (req, res) => {
   }
 });
 
+router.get('/usuarios', async (req, res) => {
+  try {
+    const result = await client.query('SELECT * FROM usuarios');
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener usuarios:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+});
+
+// Obtener todas las imágenes
+app.get('/userimg', async (req, res) => {
+  try {
+    const result = await client.query('SELECT * FROM userimg');
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener imágenes:', error);
+    res.status(500).json({ error: 'Error al obtener imágenes' });
+  }
+});
+
+// Obtener todos los hechos
+app.get('/hechos', async (req, res) => {
+  try {
+    const result = await client.query('SELECT * FROM hechos');
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error al obtener hechos:', error);
+    res.status(500).json({ error: 'Error al obtener hechos' });
+  }
+});
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
