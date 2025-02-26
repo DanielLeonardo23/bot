@@ -3,212 +3,37 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control de Linterna y Cámara</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    button {
-      padding: 10px 20px;
-      margin: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      border: none;
-      border-radius: 5px;
-      background-color: #007bff;
-      color: white;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    #imageContainer {
-      margin-top: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    #imageContainer img {
-      width: 200px;
-      margin: 10px;
-      border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-    #uploadSection, #deleteSection {
-      margin-top: 20px;
-    }
-    #responseSection {
-      margin-top: 20px;
-      border: 1px solid #ddd;
-      padding: 20px;
-      background-color: #f9f9f9;
-    }
-  </style>
+  <title>Registro de Usuario</title>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-  <h1>Control de Linterna y Cámara</h1>
+  <h1>Registro de Usuario</h1>
 
-  <!-- Botones para la linterna -->
-  <button id="encenderLinternaBtn">Encender Linterna</button>
-  <button id="apagarLinternaBtn">Apagar Linterna</button>
+  <!-- Formulario de Registro -->
+  <div id="formContainer">
+    <button id="capturarHuellaBtn">Capturar Huella</button>
+    <label for="id_usuario">ID de Usuario:</label>
+    <input type="text" id="id_usuario" placeholder="Ingrese el ID de usuario" required>
+    
+    <label for="nombres">Nombres:</label>
+    <input type="text" id="nombres" placeholder="Ingrese los nombres" required>
+    
+    <label for="id_huella">ID de Huella:</label>
+    <input type="text" id="id_huella" placeholder="Ingrese el ID de huella" required>
 
-  <!-- Botón para tomar una foto -->
-  <button id="tomarFotoBtn">Tomar Foto</button>
+    <div id="imagePreview"></div>
 
-  <!-- Botones para huella (enviados a @gaa) -->
-  <button id="capturarHuellaBtn">Capturar Huella</button>
-  <button id="verificarHuellaBtn">Verificar Huella</button>
-  <button id="eliminarHuellaBtn">Eliminar Huella</button>
+    <button id="tomarFotoBtn">Tomar Foto</button>
+    
+    <label for="link_imagen">Link de Imagen:</label>
+    <input type="text" id="link_imagen" placeholder="Link de la imagen" disabled>
+    
+    <label for="id_imagen">ID de Imagen:</label>
+    <input type="text" id="id_imagen" placeholder="ID de la imagen" disabled>
 
-  <!-- Sección para ingresar el ID al eliminar huella -->
-  <div id="deleteSection">
-    <input type="number" id="idInput" placeholder="ID (1-127)" min="1" max="127">
-    <button id="confirmarEliminarBtn">Confirmar</button>
+    <button id="registrarUsuarioBtn">Registrar Usuario</button>
   </div>
 
-  <!-- Sección para cargar una imagen -->
-  <div id="uploadSection">
-    <input type="file" id="fileInput" accept="image/*">
-    <button id="uploadBtn">Subir Imagen</button>
-  </div>
-
-  <!-- Botón para ver la última imagen -->
-  <button id="verImagenBtn">Ver Última Imagen</button>
-
-  <!-- Sección para mostrar la respuesta del servidor -->
-  <div id="responseSection">
-    <h3>Respuesta del Servidor:</h3>
-    <pre id="responseJson"></pre>
-    <div id="imageContainer"></div>
-  </div>
-
-  <script>
-    // Función para enviar mensajes al servidor con destinatario opcional
-    async function sendMessage(command, targetUsername = '@Mibotcamara_bot') {
-      try {
-        const response = await fetch("/send-message", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ command, targetUsername }),
-        });
-
-        if (response.ok) {
-          alert(`Comando "${command}" enviado a "${targetUsername}" correctamente.`);
-        } else {
-          alert(`Error al enviar el comando "${command}".`);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert(`Error al enviar el comando "${command}".`);
-      }
-    }
-
-    // Eventos para los botones principales
-    document.getElementById("encenderLinternaBtn").addEventListener("click", () => {
-      sendMessage("/activar_flash");
-    });
-
-    document.getElementById("apagarLinternaBtn").addEventListener("click", () => {
-      sendMessage("/desactivar_flash");
-    });
-
-    document.getElementById("tomarFotoBtn").addEventListener("click", () => {
-      sendMessage("/tomar_foto");
-    });
-
-    // Enviar comandos de huella a @gaa
-    document.getElementById("capturarHuellaBtn").addEventListener("click", () => {
-      sendMessage("/registrarhuella", "@Grupotwobot");
-    });
-
-    document.getElementById("verificarHuellaBtn").addEventListener("click", () => {
-      sendMessage("/verificarhuella", "@Grupotwobot");
-    });
-
-    document.getElementById("eliminarHuellaBtn").addEventListener("click", () => {
-      alert("Introduce el ID y presiona 'Confirmar'.");
-    });
-
-    document.getElementById("confirmarEliminarBtn").addEventListener("click", () => {
-      const id = document.getElementById("idInput").value;
-      if (id >= 1 && id <= 127) {
-        sendMessage(`/eliminarhuella ${id}`, "@Grupotwobot");
-      } else {
-        alert("Por favor, ingresa un ID válido (1-127).");
-      }
-    });
-
-    // Función para subir la imagen
-    async function uploadImage(file) {
-      const formData = new FormData();
-      formData.append("image", file);
-
-      try {
-        const response = await fetch("/upload", { method: "POST", body: formData });
-        const data = await response.json();
-
-        if (response.ok) {
-          displayResponse(data);
-        } else {
-          alert(`Error al subir la imagen: ${data.message}`);
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        alert("Error al subir la imagen.");
-      }
-    }
-
-    // Evento para manejar la carga de archivos
-    document.getElementById("uploadBtn").addEventListener("click", () => {
-      const fileInput = document.getElementById("fileInput");
-      if (fileInput.files.length > 0) {
-        uploadImage(fileInput.files[0]);
-      } else {
-        alert("Por favor, selecciona una imagen.");
-      }
-    });
-
-    // Función para mostrar la respuesta del servidor
-    function displayResponse(data) {
-      document.getElementById("responseJson").textContent = JSON.stringify(data, null, 2);
-
-      if (data.url) {
-        const imageContainer = document.getElementById("imageContainer");
-        const img = document.createElement("img");
-        img.src = data.url;
-        imageContainer.innerHTML = ''; // Limpiar contenedor antes de agregar la imagen
-        imageContainer.appendChild(img);
-      }
-    }
-
-    // Función para obtener la última imagen cargada
-    async function getLastImage() {
-      try {
-        const response = await fetch("/last-image");
-        const data = await response.json();
-
-        if (response.ok && data.url) {
-          const imageContainer = document.getElementById("imageContainer");
-          imageContainer.innerHTML = '';
-          const img = document.createElement("img");
-          img.src = data.url;
-          imageContainer.appendChild(img);
-        } else {
-          console.log("No hay imágenes cargadas.");
-        }
-      } catch (error) {
-        console.error("Error:", error);
-      }
-    }
-
-    // Evento para manejar el botón "Ver Última Imagen"
-    document.getElementById("verImagenBtn").addEventListener("click", () => {
-      getLastImage();
-    });
-
-    // Cargar la última imagen al iniciar la página
-    window.onload = getLastImage;
-  </script>
+  <script src="js/scripts.js"></script>
 </body>
 </html>
