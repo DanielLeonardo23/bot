@@ -235,7 +235,7 @@ function showCompletedStatus(statusElement, actionType) {
   });
 
   document.getElementById("loginForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Evita el comportamiento por defecto de enviar el formulario y recargar la página
   
     const username = document.getElementById("username").value;
     const password = document.getElementById("password").value;
@@ -249,10 +249,11 @@ function showCompletedStatus(statusElement, actionType) {
   
       const result = await response.json();
   
+      // Si la respuesta es exitosa, mostramos el dashboard
       if (response.ok) {
-        console.log("TODO BIEN?")
         alert("Inicio de sesión exitoso.");
-        window.location.href = "/dashboard.html";
+        document.querySelector('.login-container').style.display = 'none'; // Oculta el formulario de login
+        document.getElementById('dashboard').style.display = 'block'; // Muestra el dashboard
       } else {
         alert(`Error al iniciar sesión: ${result.message}`);
       }

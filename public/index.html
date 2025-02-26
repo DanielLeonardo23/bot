@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <!-- Formulario de Login -->
   <div class="login-container">
     <h1 class="text-center">Login</h1>
     <form id="loginForm">
@@ -21,6 +22,29 @@
       </div>
       <button type="submit" class="login-btn">Login</button>
     </form>
+  </div>
+
+  <!-- Dashboard Oculto hasta que el usuario se logee -->
+  <div class="dashboard-container" id="dashboard" style="display: none;">
+    <h1 class="text-center">Dashboard</h1>
+    
+    <div class="tabs">
+      <button id="hechosTab" class="tab-btn">Hechos</button>
+      <button id="imagenesTab" class="tab-btn">Imágenes</button>
+      <button id="usuariosTab" class="tab-btn">Usuarios</button>
+    </div>
+
+    <div class="tab-content" id="hechosContent">
+      <!-- Dynamic Hechos Table -->
+    </div>
+
+    <div class="tab-content" id="imagenesContent" style="display: none;">
+      <!-- Dynamic Imagenes Table -->
+    </div>
+
+    <div class="tab-content" id="usuariosContent" style="display: none;">
+      <!-- Dynamic Usuarios Table -->
+    </div>
   </div>
 
   <script src="js/scripts.js"></script>
