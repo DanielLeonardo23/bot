@@ -1,4 +1,5 @@
 const express = require('express');
+const { Client } = require('pg');
 const { CreateClient } = require('./src/lib/createClient');
 const { StringSession } = require('telegram/sessions');
 const { Logger, Api } = require('telegram');
@@ -12,6 +13,21 @@ require('dotenv').config();
 
 const app = express();
 const port = 3000;
+
+const clientDB = new Client({
+  connectionString: 'postgresql://dbsecurity_user:27PdSd9U8rvelKWnSmhR0MrN20M1uAsq@dpg-cuv3f2a3esus73bl48d0-a.oregon-postgres.render.com/dbsecurity',
+  ssl: {
+    rejectUnauthorized: false,
+  },
+});
+
+clientDB.connect()
+  .then(() => {
+    console.log('Conexión exitosa a la base de datos PostgreSQL');
+  })
+  .catch(err => {
+    console.error('Error al conectar a la base de datos:', err);
+  });
 
 // Configuración de CORS para permitir solicitudes de cualquier origen
 app.use(cors());
@@ -142,6 +158,62 @@ app.get('/last-image', (req, res) => {
       }
     });
   });
+app.post('/register-user', async (req, res) => {
+    const { name, fingerprintId } = req.body;
+  
+    try {
+      // Consulta SQL para insertar un nuevo registro de huella en la base de datos
+      const query = `
+        INSERT INTO usuarios (id_usuario, nombre, id_huella)
+        VALUES ($1, $2, $3) RETURNING *;
+      `;
+  
+      const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
+      res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+    } catch (err) {
+      console.error('Error al insertar en la base de datos:', err);
+      res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
+    }
+  });
+  
+// Ruta para verificar una huella en la base de datos
+app.post('/verify-fingerprint', async (req, res) => {
+  const { fingerprintId } = req.body;
+
+  try {
+    const query = 'SELECT * FROM usuarios WHERE id_usuario = $1';
+    const result = await clientDB.query(query, [fingerprintId]);
+
+    if (result.rows.length > 0) {
+      res.status(200).json({ success: true, message: `Huella verificada: ${result.rows[0].nombre}` });
+    } else {
+      res.status(404).json({ success: false, message: 'Huella no encontrada' });
+    }
+  } catch (err) {
+    console.error('Error al verificar la huella:', err);
+    res.status(500).json({ success: false, error: 'Error al verificar la huella' });
+  }
+});
+
+// Ruta para eliminar una huella
+app.delete('/delete-fingerprint/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const query = 'DELETE FROM usuarios WHERE id_usuario = $1';
+    const result = await clientDB.query(query, [id]);
+
+    if (result.rowCount > 0) {
+      res.status(200).json({ success: true, message: `Huella con ID ${id} eliminada` });
+    } else {
+      res.status(404).json({ success: false, message: 'Huella no encontrada' });
+    }
+  } catch (err) {
+    console.error('Error al eliminar la huella:', err);
+    res.status(500).json({ success: false, error: 'Error al eliminar la huella' });
+  }
+});
+
   
 // Iniciar el servidor
 app.listen(port, () => {
