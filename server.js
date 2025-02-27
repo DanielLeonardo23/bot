@@ -234,32 +234,32 @@ app.get('/sse-usuarios', (req, res) => {
     global.sseUsuariosClients = global.sseUsuariosClients.filter(client => client !== sendEvent);
   });
 });
-
-// Ruta para insertar un nuevo registro en la tabla usuarios
 app.post('/register-user', async (req, res) => {
-  const { id_usuario, nombre, id_huella } = req.body;
+  const { name, fingerprintId } = req.body;
 
   try {
-    // Consulta SQL para insertar un nuevo registro en la tabla usuarios
     const query = `
       INSERT INTO usuarios (id_usuario, nombre, id_huella)
       VALUES ($1, $2, $3) RETURNING *;
     `;
 
-    const result = await clientDB.query(query, [id_usuario, nombre, id_huella]);
+    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
 
-    // Notificar a los clientes conectados a través de SSE
+    // Enviar la respuesta una sola vez y detener la ejecución
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+
+    // Notificar a los clientes SSE si están conectados
     if (global.sseUsuariosClients && global.sseUsuariosClients.length > 0) {
       const newUser = result.rows[0];
       global.sseUsuariosClients.forEach(client => client(newUser));
     }
 
-    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
   } catch (err) {
     console.error('Error al insertar en la base de datos:', err);
     res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
   }
 });
+
 
 // Endpoint para Server-Sent Events (SSE) de imágenes
 app.get('/sse-imagenes', (req, res) => {
