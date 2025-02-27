@@ -21,6 +21,61 @@ async function sendMessage(command, targetUsername = '@Grupotwobot') {
   }
 }
 
+// Conectar al endpoint SSE
+const eventSource = new EventSource('/sse-usuarios');
+
+// Escuchar eventos de "nuevo_usuario"
+eventSource.addEventListener('nuevo_usuario', (event) => {
+  const newUser = JSON.parse(event.data); // Parsear los datos recibidos
+  console.log('Nuevo registro en usuarios:', newUser);
+
+  // Verificar si hay un nuevo registro comparando con los últimos datos almacenados
+  if (!lastUserData.id_usuario || lastUserData.id_usuario !== newUser.id_usuario) {
+    // Actualizar los campos del formulario
+    document.getElementById('id_usuario').value = newUser.id_usuario;
+    document.getElementById('nombres').value = newUser.nombre;
+    document.getElementById('id_huella').value = newUser.id_huella;
+
+    // Mostrar mensajes de éxito
+    showCompletedStatus(document.getElementById('huellaStatus'), 'huella');
+
+    // Guardar los últimos datos del usuario para la próxima comparación
+    lastUserData = newUser;
+  }
+});
+
+// Manejar errores de conexión
+eventSource.onerror = (error) => {
+  console.error('Error en la conexión SSE:', error);
+  eventSource.close(); // Cerrar la conexión si hay un error
+};
+
+const eventSourceImagenes = new EventSource('/sse-imagenes');
+
+eventSourceImagenes.addEventListener('nueva_imagen', (event) => {
+  const newImage = JSON.parse(event.data);
+  console.log('Nueva imagen registrada:', newImage);
+
+  // Actualizar los campos del formulario
+  document.getElementById('link_imagen').value = newImage.link_imagen;
+  document.getElementById('id_imagen').value = newImage.id_imagen;
+
+  // Mostrar la imagen en el preview
+  const imgElement = document.createElement('img');
+  imgElement.src = newImage.link_imagen;
+  document.getElementById('imagePreview').innerHTML = ''; // Limpiar antes de agregar la imagen
+  document.getElementById('imagePreview').appendChild(imgElement);
+
+  // Mostrar un mensaje de éxito
+  showCompletedStatus(document.getElementById('fotoStatus'), 'foto');
+});
+
+eventSourceImagenes.onerror = (error) => {
+  console.error('Error en la conexión SSE para imágenes:', error);
+  eventSourceImagenes.close();
+};
+
+
 // Función para mostrar un símbolo de "cargando"
 function showLoadingStatus(statusElement) {
 statusElement.innerHTML = '<span class="loading">Cargando...</span>';  // Aquí podrías poner un spinner o icono de carga
@@ -37,7 +92,7 @@ if (actionType === 'huella') {
 
 document.getElementById("capturarHuellaBtn").addEventListener("click", async () => {
   sendMessage("/registrarhuella", "@Grupotwobot");
-  await verifyAndLoadUserData();
+
 });
 
 
@@ -91,32 +146,6 @@ document.getElementById("registrarUsuarioBtn").addEventListener("click", async (
 
 
 
-async function verifyAndLoadImageData() {
-  try {
-    const response = await fetch("/last-image");
-    const imageData = await response.json();
-
-    // Verificar si hay un nuevo archivo de imagen
-    if (!lastImageData.id_imagen || lastImageData.id_imagen !== imageData.filename) {
-      document.getElementById("link_imagen").value = imageData.url;
-      document.getElementById("id_imagen").value = imageData.filename;
-
-      // Mostrar la imagen en el preview
-      const imgElement = document.createElement("img");
-      imgElement.src = imageData.url;
-      document.getElementById("imagePreview").innerHTML = ""; // Limpiar antes de agregar la imagen
-      document.getElementById("imagePreview").appendChild(imgElement);
-
-      // Mostrar el estado de completado
-      showCompletedStatus(document.getElementById("fotoStatus"), 'foto');
-
-      // Guardar los datos de la última imagen consultada
-      lastImageData = imageData;
-    }
-  } catch (error) {
-    console.error("Error al cargar la imagen:", error);
-  }
-}
 
 // Función para mostrar un símbolo de "cargando"
 function showLoadingStatus(statusElement) {
@@ -155,5 +184,3 @@ async function verifyAndLoadUserData() {
   }
 }
 
-setInterval(verifyAndLoadUserData, 3000); // Verifica cambios cada 3 segundos
-setInterval(verifyAndLoadImageData, 3000); // Verifica cambios en la imagen cada 3 segundos
