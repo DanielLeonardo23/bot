@@ -309,18 +309,22 @@ app.post('/login', async (req, res) => {
 
 app.get('/usuarios', async (req, res) => {
   try {
-    const result = await client.query('SELECT * FROM usuarios');
+    const result = await clientDB.query('SELECT * FROM usuarios');
     res.status(200).json(result.rows);
   } catch (error) {
-    console.error('Error al obtener usuarios:', error);
-    res.status(500).json({ error: 'Error al obtener usuarios' });
+    console.error('Error al obtener usuarios:', error); // Muestra el error completo
+    res.status(500).json({ 
+      error: 'Error al obtener usuarios',
+      details: error.message,  // Añadir detalles del error
+    });
   }
 });
+
 
 // Obtener todas las imágenes
 app.get('/userimg', async (req, res) => {
   try {
-    const result = await client.query('SELECT * FROM userimg');
+    const result = await clientDB.query('SELECT * FROM userimg');
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error al obtener imágenes:', error);
@@ -331,7 +335,7 @@ app.get('/userimg', async (req, res) => {
 // Obtener todos los hechos
 app.get('/hechos', async (req, res) => {
   try {
-    const result = await client.query('SELECT * FROM hechos');
+    const result = await clientDB.query('SELECT * FROM hechos');
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error al obtener hechos:', error);
