@@ -20,43 +20,82 @@ async function sendMessage(command, targetUsername = "@Grupotwobot") {
 
 // Función para eliminar huella en la base de datos y enviar comando
 async function eliminarHuella(id) {
-    if (!confirm(`¿Seguro que deseas eliminar la huella con ID ${id}?`)) return;
+    const confirmacion = await Swal.fire({
+        title: "¿Estás seguro?",
+        text: `La huella con ID ${id} será eliminada.`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!confirmacion.isConfirmed) return;
 
     try {
-        // 1️⃣ Enviar comando al bot de Telegram
+        // 1️⃣ Mostrar alerta de carga sin botones
+        Swal.fire({
+            title: "Eliminando huella...",
+            text: "Por favor, espere...",
+            icon: "info",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        // 2️⃣ Enviar comando al sistema
         sendMessage(`/eliminarhuella ${id}`, "@Grupotwobot");
 
-        // 2️⃣ Mostrar mensaje de espera y deshabilitar botones para evitar doble eliminación
-        alert("Enviando comando para eliminar huella... Espere un momento.");
-        document.querySelectorAll(".delete-btn").forEach(btn => btn.disabled = true);
-
-        // 3️⃣ Esperar 5 segundos antes de eliminar en la BD (ajusta según lo que tarde el ESP32)
+        // 3️⃣ Esperar antes de eliminar en la BD (ajusta el tiempo si es necesario)
         setTimeout(async () => {
             try {
-                // 4️⃣ Eliminar huella en la base de datos
                 const response = await fetch(`/delete-fingerprint/${id}`, { method: "DELETE" });
                 const result = await response.json();
 
                 if (result.success) {
-                    alert(`Huella con ID ${id} eliminada correctamente.`);
+                    // 4️⃣ Cerrar la alerta de carga y mostrar éxito
+                    Swal.fire({
+                        title: "Huella eliminada",
+                        text: `La huella con ID ${id} se eliminó correctamente.`,
+                        icon: "success",
+                        confirmButtonColor: "#00ff88"
+                    });
                 } else {
-                    alert("Error: " + result.message);
+                    Swal.fire({
+                        title: "Error",
+                        text: result.message,
+                        icon: "error",
+                        confirmButtonColor: "#d33"
+                    });
                 }
             } catch (error) {
-                alert("Error al eliminar la huella en la BD.");
+                Swal.fire({
+                    title: "Error",
+                    text: "Hubo un problema al eliminar la huella.",
+                    icon: "error",
+                    confirmButtonColor: "#d33"
+                });
                 console.error(error);
             }
 
-            // 5️⃣ Reactivar botones y actualizar lista de usuarios
-            document.querySelectorAll(".delete-btn").forEach(btn => btn.disabled = false);
+            // 5️⃣ Actualizar la tabla de usuarios
             fetchUsuarios();
-        }, 5000); // Espera de 5 segundos antes de eliminar en la BD
+        }, 5000);
 
     } catch (error) {
-        alert("Error al procesar la eliminación.");
+        Swal.fire({
+            title: "Error",
+            text: "Ocurrió un problema inesperado.",
+            icon: "error",
+            confirmButtonColor: "#d33"
+        });
         console.error(error);
     }
 }
+
 
 
 // Exportar funciones para usarlas en el HTML
