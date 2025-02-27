@@ -68,3 +68,18 @@ body {
   flex: 1;
   padding: 20px;
 }
+  /* Recuadro fijo para notificaciones */
+  #notifications {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 300px;
+    padding: 15px;
+    background-color: #161b22;
+    border: 1px solid #00ff88;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 255, 136, 0.2);
+    color: #c9d1d9;
+    font-size: 14px;
+    z-index: 1000;
+  }

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestión de Huellas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      text-align: center;
+      background-color: #0d1117;
+      color: #c9d1d9;
+    }
+    h1 {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 500;
+      color: #00ff88;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 80%;
+      margin: auto;
+      border-collapse: collapse;
+      background-color: #161b22;
+      border: 1px solid #00ff88;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #00ff88;
+      text-align: center;
+    }
+    th {
+      background-color: #00ff88;
+      color: #0d1117;
+    }
+    .delete-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s;
+    }
+    .delete-btn:hover {
+      background: #cc0000;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Gestión de Huellas</h1>
+  <div id="tablaContainer"></div>
+
+  <script>
+    async function fetchUsuarios() {
+      try {
+        const response = await fetch('/usuarios');
+        const usuarios = await response.json();
+        mostrarTabla(usuarios);
+      } catch (error) {
+        console.error('Error al obtener usuarios:', error);
+      }
+    }
+
+    function mostrarTabla(usuarios) {
+      const tablaContainer = document.getElementById('tablaContainer');
+      tablaContainer.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>ID Usuario</th>
+              <th>Nombre</th>
+              <th>ID Huella</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${usuarios.map(usuario => `
+              <tr>
+                <td>${usuario.id_usuario}</td>
+                <td>${usuario.nombre}</td>
+                <td>${usuario.id_huella}</td>
+                <td><button class="delete-btn" onclick="eliminarHuella(${usuario.id_usuario})">Eliminar</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function eliminarHuella(id) {
+      if (!confirm(`¿Seguro que deseas eliminar la huella con ID ${id}?`)) return;
+
+      try {
+        const response = await fetch(`/delete-fingerprint/${id}`, { method: 'DELETE' });
+        const result = await response.json();
+
+        if (result.success) {
+          alert(result.message);
+          fetchUsuarios(); // Recargar la lista
+        } else {
+          alert('Error: ' + result.message);
+        }
+      } catch (error) {
+        alert('Error al eliminar la huella.');
+        console.error(error);
+      }
+    }
+
+    fetchUsuarios(); // Cargar usuarios al inicio
+  </script>
+
+</body>
+</html>
