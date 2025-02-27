@@ -33,7 +33,7 @@ async function verificarHuella() {
       });
 
       // 2️⃣ Enviar comando al ESP32 para iniciar la verificación
-      sendMessage("/verificarhuella", "@Grupotwobot");
+      await sendMessage("/verificarhuella", "@Grupotwobot");
 
       // 3️⃣ Esperar 5 segundos antes de consultar la BD
       setTimeout(async () => {
