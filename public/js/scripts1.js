@@ -35,7 +35,7 @@ document.getElementById("verificarHuellaBtn").addEventListener("click", async ()
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok) {
           verificacionStatus.innerHTML = '<span style="color: #00ff88;">✅ Huella verificada correctamente</span>';
           mostrarTarjetaUsuario(data.user);
         } else {
