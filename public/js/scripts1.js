@@ -46,7 +46,7 @@ document.getElementById("verificarHuellaBtn").addEventListener("click", async ()
         console.error("Error al verificar huella:", error);
         verificacionStatus.innerHTML = '<span style="color: #ff4c4c;">❌ Error en la verificación</span>';
       }
-    }, 5000);
+    }, 12000);
   });
 
   function mostrarTarjetaUsuario(user) {
