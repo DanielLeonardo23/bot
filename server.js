@@ -292,27 +292,34 @@ app.get('/sse-imagenes', (req, res) => {
 app.post('/verify-fingerprint', async (req, res) => {
   const { fingerprintId } = req.body;
   console.log("🔹 ID de huella recibido del ESP32:", fingerprintId); // Debugging
+
   if (!fingerprintId) {
       return res.status(400).json({ success: false, message: "ID de huella no recibido" });
   }
+
   try {
       const query = 'SELECT nombre, id_huella FROM usuarios WHERE id_huella = $1';
       const result = await clientDB.query(query, [fingerprintId]);
+
       if (result.rows.length > 0) {
           const user = result.rows[0]; // Extraer el usuario de la consulta
-          res.status(200).json({
+          lastFingerprintVerification = { 
               success: true,
               message: `Huella verificada: ${user.nombre}`,
               user: user
-          });
+          };
+          res.status(200).json(lastFingerprintVerification);
       } else {
-          res.status(404).json({ success: false, message: "Huella no encontrada" });
+          lastFingerprintVerification = { success: false, message: "Huella no encontrada" };
+          res.status(404).json(lastFingerprintVerification);
       }
   } catch (err) {
       console.error("❌ Error al verificar la huella:", err);
       res.status(500).json({ success: false, error: "Error al verificar la huella" });
   }
 });
+
+// Consultar el último resultado de verificación de huella
 app.get("/verify-fingerprint-result", (req, res) => {
   if (lastFingerprintVerification) {
       res.json(lastFingerprintVerification);
