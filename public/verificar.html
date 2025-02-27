@@ -66,15 +66,31 @@
       margin: 0;
       color: #00ff88;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #00ff88;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background-color: #161b22;
+    }
   </style>
 </head>
 <body>
-    <h1>Verificar Usuario</h1>
-    <div id="formContainer">
-      <button id="verificarHuellaBtn"><i class="fas fa-search"></i> Verificar Huella</button>
-      <div id="verificacionStatus" class="status"></div>
-      <div id="resultado"></div> <!-- Aquí se mostrará la tarjeta del usuario -->
-    </div>
-    <script src="js/scripts1.js"></script>
-  </body>
+  <h1>Verificar Usuario</h1>
+  <div id="formContainer">
+    <button id="verificarHuellaBtn"><i class="fas fa-search"></i> Verificar Huella</button>
+    <div id="verificacionStatus" class="status"></div>
+    <div id="resultado"></div> <!-- Aquí se mostrará la tarjeta del usuario -->
+    <div id="tablaContainer"></div> <!-- Aquí se mostrará la tabla de hechos -->
+  </div>
+  <script src="js/scripts1.js"></script>
+</body>
 </html>
