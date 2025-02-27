@@ -432,6 +432,51 @@ app.get('/hechos', async (req, res) => {
   }
 });
 
+
+
+app.get('/sse-enrollment', (req, res) => {
+  // Configurar los headers para SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Permitir CORS
+
+  console.log('Cliente conectado a SSE para enrolamiento');
+
+  // Función para enviar eventos al cliente
+  const sendEvent = (data) => {
+    res.write(`event: enrollment_status\n`); // Nombre del evento
+    res.write(`data: ${JSON.stringify(data)}\n\n`); // Datos del evento
+  };
+
+  // Guardar la función sendEvent en una variable global para usarla en otras rutas
+  global.sseEnrollmentClients = global.sseEnrollmentClients || [];
+  global.sseEnrollmentClients.push(sendEvent);
+
+  // Manejar la desconexión del cliente
+  req.on('close', () => {
+    console.log('Cliente desconectado de SSE para enrolamiento');
+    global.sseEnrollmentClients = global.sseEnrollmentClients.filter(client => client !== sendEvent);
+  });
+});
+
+
+app.post('/enrollment-status', (req, res) => {
+  const { status } = req.body;
+
+  if (!status) {
+    return res.status(400).json({ success: false, error: 'Estado no proporcionado.' });
+  }
+
+  console.log('Estado del enrolamiento recibido:', status);
+
+  // Notificar a los clientes conectados a través de SSE
+  if (global.sseEnrollmentClients && global.sseEnrollmentClients.length > 0) {
+    global.sseEnrollmentClients.forEach(client => client({ status }));
+  }
+
+  res.status(200).json({ success: true, message: 'Estado recibido correctamente.' });
+});
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Servidor escuchando en http://localhost:${port}`);
