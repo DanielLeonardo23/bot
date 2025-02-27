@@ -13,15 +13,157 @@
     <aside class="sidebar">
       <ul>
         <li><a href="registro.html"><i class="fas fa-user-plus"></i> Registro</a></li>
-        <li><a href="#"><i class="fas fa-cogs"></i> Configuración</a></li>
+        <li><a href="verificar.html"><i class="fas fa-cogs"></i>Verificación</a></li>
+        <li><a href="#"><i class="fas fa-cogs"></i>Gestionar</a></li>
+
+        
       </ul>
     </aside>
 
     <main class="content">
-      <h2>Bienvenido al Panel</h2>
-      <p>Selecciona una opción en el menú lateral.</p>
+        <h2><i class="fas fa-tachometer-alt"></i> Bienvenido al Panel</h2>
+        <p>Resumen de accesos y registros biométricos.</p>
+    
+        <div class="dashboard-charts">
+            <!-- Gráfico de Huellas Registradas -->
+            <div class="chart-container">
+                <h3>Huellas Registradas</h3>
+                <canvas id="barChart"></canvas>
+            </div>
+    
+            <!-- Gráfico de Accesos Fallidos vs Exitosos -->
+            <div class="chart-container">
+                <h3>Accesos Fallidos vs Exitosos</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+        </div>
     </main>
-  </div>
+    
+    <!-- Agregar la librería Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+      // Gráfico de barras - Huellas Registradas por mes
+      const barCtx = document.getElementById('barChart').getContext('2d');
+      new Chart(barCtx, {
+          type: 'bar',
+          data: {
+              labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo'],
+              datasets: [{
+                  label: 'Huellas Registradas',
+                  data: [30, 45, 50, 60, 75], // Datos ficticios
+                  backgroundColor: '#00ff88'
+              }]
+          },
+          options: {
+              responsive: true,
+              plugins: {
+                  legend: { display: false }
+              }
+          }
+      });
+    
+      // Gráfico de pastel - Accesos Fallidos vs Exitosos
+      const pieCtx = document.getElementById('pieChart').getContext('2d');
+      new Chart(pieCtx, {
+          type: 'pie',
+          data: {
+              labels: ['Accesos Exitosos', 'Accesos Fallidos'],
+              datasets: [{
+                  data: [85, 15], // Datos ficticios
+                  backgroundColor: ['#36a2eb', '#ff6384']
+              }]
+          },
+          options: {
+              responsive: true
+          }
+      });
+    </script>
+    
+    <style>
+      .dashboard-charts {
+          display: flex;
+          justify-content: space-around;
+          flex-wrap: wrap;
+          margin-top: 20px;
+      }
+    
+      .chart-container {
+          text-align: center;
+          width: 45%;
+      }
+    
+      canvas {
+          max-width: 100%;
+          max-height: 300px;
+      }
+    </style>
+    
+</div>
+
+<style>
+  /* Contenedor principal */
+  .dashboard-container {
+    display: flex;
+    height: 100vh;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .sidebar ul li {
+    padding: 15px;
+    text-align: left;
+  }
+
+  .sidebar ul li a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    transition: background 0.3s;
+    padding: 10px;
+    border-radius: 5px;
+  }
+
+  .sidebar ul li a i {
+    margin-right: 10px;
+  }
+
+  .sidebar ul li a:hover {
+    background: #1ABC9C; /* Verde turquesa */
+  }
+
+  /* Contenido principal */
+  .content {
+    flex: 1;
+    background: #ECF0F1; /* Gris claro elegante */
+    padding: 30px;
+    text-align: center;
+  }
+
+  .content h2 {
+    background: #34495E; /* Azul oscuro elegante */
+    color: white;
+    padding: 15px;
+    border-radius: 8px;
+    display: inline-block;
+    font-size: 22px;
+  }
+
+  .content h2 i {
+    margin-right: 10px;
+  }
+
+  .content p {
+    font-size: 16px;
+    color: #333;
+  }
+</style>
+
 
   <script>
     fetch("navbar.html")

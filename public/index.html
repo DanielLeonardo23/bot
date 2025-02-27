@@ -13,11 +13,30 @@
   <div class="container">
     <img src="img/logo.png" alt="Logo del Proyecto" class="logo">
     <h1>Bienvenido al Sistema de Control de Acceso</h1>
-    <div class="images-container">
-      <img src="img/docente.png" alt="Imagen del Docente">
-      <img src="img/curso.png" alt="Imagen del Curso">
-    </div>
     <a href="dashboard.html" class="btn">Ingresar</a>
+    <div class="content">
+      <!-- Información del Docente -->
+      <div class="info-box">
+        <img src="img/docente.png" alt="Imagen del Docente" class="info-img">
+        <div class="info-text">
+          <h2>Docente - Jose Alfredo Herrera Quispe</h2>
+          <p>Director de escuela profesional de Ciencia de la Computación en la Universidad Nacional Mayor de San Marcos - FISI
+.</p>
+        </div>
+       
+      </div>
+    
+      <!-- Información del Curso -->
+      <div class="info-box">
+        <img src="img/curso.png" alt="Imagen del Curso" class="info-img">
+        <div class="info-text">
+          <h2>Curso - Internet de las Cosas (IoT)</h2>
+          <p>The Internet of Things (IoT) refers to a network of interconnected devices that communicate and exchange data over the internet. These devices, equipped with sensors and software, can collect, process, and share information to automate tasks, improve efficiency, and enhance user experiences.</p>
+        </div>
+      </div>
+    </div>
+
+    
   </div>
 
   <script>
@@ -26,5 +45,59 @@
       .then(response => response.text())
       .then(data => document.getElementById("navbar").innerHTML = data);
   </script>
+
+  <style>
+    .content {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .info-box {
+      display: flex;
+      align-items: center;
+      background: #f4f4f4;
+      padding: 15px;
+      border-radius: 8px;
+      width: 45%;
+      text-align: left;
+    }
+
+    .info-img {
+      width: 80px;
+      height: 80px;
+      margin-right: 15px;
+    }
+
+    .info-text h2 {
+  margin: 0;
+  font-size: 1.2em;
+  color: #47a146; /* Verde claro */
+}
+
+    .info-text p {
+      margin: 5px 0 0;
+      font-size: 0.9em;
+      color: #5e5151;
+    }
+
+    .btn {
+      display: block;
+      width: 200px;
+      margin: 20px auto;
+      text-align: center;
+      padding: 10px;
+      background: #007bff;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    .btn:hover {
+      background: #0056b3;
+    }
+  </style>
 </body>
+
 </html>
