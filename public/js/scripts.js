@@ -93,37 +93,30 @@ document.getElementById("registrarUsuarioBtn").addEventListener("click", async (
 
 async function verifyAndLoadImageData() {
   try {
-    // Consultar los valores iniciales
-    const initialResponse = await fetch("/last-image");
-    const initialData = await initialResponse.json();
-    
-    // Esperar 5 segundos antes de la segunda consulta
-    await new Promise(resolve => setTimeout(resolve, 5000));
-    
-    // Consultar los valores después del tiempo de espera
-    const finalResponse = await fetch("/last-image");
-    const finalData = await finalResponse.json();
-    
-    // Comparar valores antes y después
-    const isChanged = initialData.filename !== finalData.filename;
-    
-    if (isChanged) {
-      document.getElementById("link_imagen").value = finalData.url;
-      document.getElementById("id_imagen").value = finalData.filename;
-      
+    const response = await fetch("/last-image");
+    const imageData = await response.json();
+
+    // Verificar si hay un nuevo archivo de imagen
+    if (!lastImageData.id_imagen || lastImageData.id_imagen !== imageData.filename) {
+      document.getElementById("link_imagen").value = imageData.url;
+      document.getElementById("id_imagen").value = imageData.filename;
+
+      // Mostrar la imagen en el preview
       const imgElement = document.createElement("img");
-      imgElement.src = finalData.url;
+      imgElement.src = imageData.url;
       document.getElementById("imagePreview").innerHTML = ""; // Limpiar antes de agregar la imagen
       document.getElementById("imagePreview").appendChild(imgElement);
-      
-      // Mostrar el estado de completado solo si hubo cambios
-      showCompletedStatus(document.getElementById("fotoStatus"), 'foto', isChanged);
+
+      // Mostrar el estado de completado
+      showCompletedStatus(document.getElementById("fotoStatus"), 'foto');
+
+      // Guardar los datos de la última imagen consultada
+      lastImageData = imageData;
     }
   } catch (error) {
     console.error("Error al cargar la imagen:", error);
   }
 }
-
 
 // Función para mostrar un símbolo de "cargando"
 function showLoadingStatus(statusElement) {
