@@ -91,27 +91,9 @@
       `;
     }
 
-    async function eliminarHuella(id) {
-      if (!confirm(`¿Seguro que deseas eliminar la huella con ID ${id}?`)) return;
-
-      try {
-        const response = await fetch(`/delete-fingerprint/${id}`, { method: 'DELETE' });
-        const result = await response.json();
-
-        if (result.success) {
-          alert(result.message);
-          fetchUsuarios(); // Recargar la lista
-        } else {
-          alert('Error: ' + result.message);
-        }
-      } catch (error) {
-        alert('Error al eliminar la huella.');
-        console.error(error);
-      }
-    }
-
     fetchUsuarios(); // Cargar usuarios al inicio
   </script>
 
+  <script src="js/scripts2.js"></script> <!-- Asegúrate de que este archivo está en public/js -->
 </body>
 </html>
