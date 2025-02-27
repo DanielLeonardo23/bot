@@ -236,20 +236,48 @@ app.get('/sse-usuarios', (req, res) => {
   });
 });
 
-// Ruta para insertar un nuevo registro en la tabla usuarios
 app.post('/register-user', async (req, res) => {
-  const { id_usuario, nombre, id_huella } = req.body;
+  const { name, fingerprintId } = req.body;
 
   try {
-    // Consulta SQL para insertar un nuevo registro en la tabla usuarios
+    // Consulta SQL para insertar un nuevo registro de huella en la base de datos
     const query = `
       INSERT INTO usuarios (id_usuario, nombre, id_huella)
       VALUES ($1, $2, $3) RETURNING *;
     `;
 
-    const result = await clientDB.query(query, [id_usuario, nombre, id_huella]);
+    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
 
-    // Notificar a los clientes conectados a través de SSE
+      // Notificar a los clientes SSE si están conectados
+      if (global.sseUsuariosClients && global.sseUsuariosClients.length > 0) {
+        const newUser = result.rows[0];
+        global.sseUsuariosClients.forEach(client => client(newUser));
+      }
+  
+      res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+  } catch (err) {
+    console.error('Error al insertar en la base de datos:', err);
+    res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
+  }
+});
+// Ruta para registrar usuario con huella
+app.post('/register-user2', async (req, res) => {
+  const { name, fingerprintId } = req.body;
+
+ 
+  try {
+    // Generar automáticamente el ID del usuario (asumiendo autoincrement en la DB)
+   // Consulta SQL para insertar un nuevo registro de huella en la base de datos
+   const query = `
+   INSERT INTO usuarios (id_usuario, nombre, id_huella)
+   VALUES ($1, $2, $3) RETURNING *;
+ `;
+
+    const result = await clientDB.query(query, [name, fingerprintId]);
+    res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
+
+    // Notificar a los clientes SSE si están conectados
     if (global.sseUsuariosClients && global.sseUsuariosClients.length > 0) {
       const newUser = result.rows[0];
       global.sseUsuariosClients.forEach(client => client(newUser));
@@ -257,7 +285,7 @@ app.post('/register-user', async (req, res) => {
 
     res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
   } catch (err) {
-    console.error('Error al insertar en la base de datos:', err);
+    console.error('❌ Error al insertar en la base de datos:', err);
     res.status(500).json({ success: false, error: 'Error al insertar en la base de datos' });
   }
 });
