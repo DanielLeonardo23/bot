@@ -1,5 +1,21 @@
-
-
+async function sendMessage(command, targetUsername = '@Grupotwobot') {
+    try {
+      const response = await fetch("/send-message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ command, targetUsername }),
+      });
+ 
+      if (response.ok) {
+        alert(`Comando "${command}" enviado a "${targetUsername}" correctamente.`);
+      } else {
+        alert(`Error al enviar el comando "${command}".`);
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`Error al enviar el comando "${command}".`);
+    }
+}
 document.getElementById("verificarHuellaBtn").addEventListener("click", async () => {
     const verificacionStatus = document.getElementById("verificacionStatus");
     verificacionStatus.innerHTML = '<div class="spinner"></div> Verificando huella...';
@@ -19,7 +35,7 @@ document.getElementById("verificarHuellaBtn").addEventListener("click", async ()
 
         const data = await response.json();
 
-        if (data.success) {
+        if (response.ok) {
           verificacionStatus.innerHTML = '<span style="color: #00ff88;">✅ Huella verificada correctamente</span>';
           mostrarTarjetaUsuario(data.user);
         } else {
@@ -30,7 +46,7 @@ document.getElementById("verificarHuellaBtn").addEventListener("click", async ()
         console.error("Error al verificar huella:", error);
         verificacionStatus.innerHTML = '<span style="color: #ff4c4c;">❌ Error en la verificación</span>';
       }
-    }, 5000);
+    }, 12000);
   });
 
   function mostrarTarjetaUsuario(user) {
@@ -38,7 +54,8 @@ document.getElementById("verificarHuellaBtn").addEventListener("click", async ()
       <div class="tarjeta">
         <h2>${user.nombre}</h2>
         <p>ID: ${user.id_usuario}</p>
-       
+        <p>Cargo: ${user.cargo}</p>
+        <p>Departamento: ${user.departamento}</p>
       </div>
     `;
     document.getElementById("resultado").innerHTML = tarjetaHTML;
