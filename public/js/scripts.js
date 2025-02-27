@@ -34,36 +34,19 @@ if (actionType === 'huella') {
 }
 }
 
-// Función para capturar huella
-document.getElementById("capturarHuellaBtn").addEventListener("click", () => {
+document.getElementById("capturarHuellaBtn").addEventListener("click", async () => {
   sendMessage("/registrarhuella", "@Grupotwobot");
-  const huellaStatus = document.getElementById("huellaStatus");
-
-  // Mostrar "Cargando..."
-  showLoadingStatus(huellaStatus);
-
-  // Esperar 5 segundos antes de actualizar
-  setTimeout(async () => {
-    showCompletedStatus(huellaStatus, 'huella');
-
-    // Después de 5 segundos, verificar y cargar los últimos valores
-    await verifyAndLoadUserData();
-  }, 5000);
+  await verifyAndLoadUserData();
 });
+
+
 
 
 // Función para tomar foto
 document.getElementById("tomarFotoBtn").addEventListener("click", () => {
   sendMessage("/tomar_foto", "@Mibotcamara_bot");
-   // Mostrar el símbolo de "cargando"
-   const fotoStatus = document.getElementById("fotoStatus");
+  
 
-showLoadingStatus(fotoStatus);
-  // Simular un retraso de 5 segundos (5000 ms)
-  setTimeout(() => {
-    // Mostrar el símbolo de "registrado"
-    
-  }, 5000);
 });
 // Función para registrar el usuario
 document.getElementById("registrarUsuarioBtn").addEventListener("click", async () => {
@@ -83,7 +66,7 @@ document.getElementById("registrarUsuarioBtn").addEventListener("click", async (
     };
 
     try {
-      const response = await fetch("/register-user", {
+      const response = await fetch("/register-user1", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(userData),
@@ -164,7 +147,7 @@ async function verifyAndLoadUserData() {
     const initialData = await initialResponse.json();
     
     // Esperar 5 segundos antes de la segunda consulta
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise(resolve => setTimeout(resolve, 15000));
     
     // Consultar los valores después del tiempo de espera
     const finalResponse = await fetch("/last-user");
@@ -180,7 +163,7 @@ async function verifyAndLoadUserData() {
     if (isChanged) {
       // Actualizar los valores en el formulario si han cambiado
       document.getElementById("id_usuario").value = finalData.id_usuario;
-      document.getElementById("nombres").value = finalData.nombre;
+      document.getElementById("nombre").value = finalData.nombre;
       document.getElementById("id_huella").value = finalData.id_huella;
       
       // Mostrar el estado de completado solo si hubo cambios
