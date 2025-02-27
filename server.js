@@ -295,11 +295,23 @@ app.post('/verify-fingerprint', async (req, res) => {
     const query = 'SELECT * FROM usuarios WHERE id_usuario = $1';
     const result = await clientDB.query(query, [fingerprintId]);
 
+    let estado;
     if (result.rows.length > 0) {
-      res.status(200).json({ success: true, message: `Huella verificada: ${result.rows[0].nombre}` });
+      const user = result.rows[0];
+      estado = 'Acceso permitido';
+      res.status(200).json({ success: true, message: `Huella verificada: ${user.nombre}` });
     } else {
+      estado = 'Acceso denegado';
       res.status(404).json({ success: false, message: 'Huella no encontrada' });
     }
+    // Insertar en la tabla hechos
+    const fecha = new Date();
+    const insertHechoQuery = `
+      INSERT INTO hechos (id_usuario, fecha, estado)
+      VALUES ($1, $2, $3) RETURNING *;
+    `;
+    await clientDB.query(insertHechoQuery, [fingerprintId, fecha, estado]);
+
   } catch (err) {
     console.error('Error al verificar la huella:', err);
     res.status(500).json({ success: false, error: 'Error al verificar la huella' });
