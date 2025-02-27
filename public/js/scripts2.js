@@ -8,15 +8,32 @@ async function sendMessage(command, targetUsername = "@Grupotwobot") {
         });
 
         if (response.ok) {
-            alert(`Comando "${command}" enviado a "${targetUsername}" correctamente.`);
+            Swal.fire({
+                title: "Proceso en marcha",
+                text: "La acción se ha enviado correctamente.",
+                icon: "info",
+                timer: 2000,
+                showConfirmButton: false
+            });
         } else {
-            alert(`Error al enviar el comando "${command}".`);
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un problema al procesar la solicitud.",
+                icon: "error",
+                confirmButtonColor: "#d33"
+            });
         }
     } catch (error) {
         console.error("Error:", error);
-        alert(`Error al enviar el comando "${command}".`);
+        Swal.fire({
+            title: "Error",
+            text: "Ocurrió un error al enviar la solicitud.",
+            icon: "error",
+            confirmButtonColor: "#d33"
+        });
     }
 }
+
 
 // Función para eliminar huella en la base de datos y enviar comando
 async function eliminarHuella(id) {
