@@ -107,6 +107,7 @@ app.post('/send-message', async (req, res) => {
   }
 });
 
+
 // Ruta para cargar imágenes a Cloudinary y guardar la URL en la base de datos
 app.post('/upload', upload.single('image'), async (req, res) => {
   if (!req.file) {
@@ -132,8 +133,14 @@ app.post('/upload', upload.single('image'), async (req, res) => {
         const query = 'INSERT INTO imagenes (id_imagen, link_imagen) VALUES ($1, $2) RETURNING *;';
         const imageId = result.public_id;  // Usamos el public_id de Cloudinary como id_imagen
 
-        await clientDB.query(query, [imageId, imageUrl]);
+        const dbResult = await clientDB.query(query, [imageId, imageUrl]);
         console.log('URL de la imagen guardada en la base de datos');
+
+        // Notificar a los clientes conectados a través de SSE
+        if (global.sseImagenesClients && global.sseImagenesClients.length > 0) {
+          const newImage = dbResult.rows[0]; // Datos de la imagen insertada
+          global.sseImagenesClients.forEach(client => client(newImage));
+        }
 
         // Responder con la URL de la imagen subida
         res.json({
@@ -148,7 +155,6 @@ app.post('/upload', upload.single('image'), async (req, res) => {
     }
   ).end(req.file.buffer);  // Usamos el archivo desde la memoria
 });
-
 // Ruta para obtener la última imagen
 app.get('/last-image', async (req, res) => {
   try {
@@ -203,17 +209,52 @@ app.post('/register-user1', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error al registrar el usuario en userimg' });
   }
 });
+// Endpoint para Server-Sent Events (SSE)
+app.get('/sse-usuarios', (req, res) => {
+  // Configurar los headers para SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Permitir CORS
+
+  console.log('Cliente conectado a SSE para usuarios');
+
+  // Función para enviar eventos al cliente
+  const sendEvent = (data) => {
+    res.write(`event: nuevo_usuario\n`); // Nombre del evento
+    res.write(`data: ${JSON.stringify(data)}\n\n`); // Datos del evento
+  };
+
+  // Guardar la función sendEvent en una variable global para usarla en otras rutas
+  global.sseUsuariosClients = global.sseUsuariosClients || [];
+  global.sseUsuariosClients.push(sendEvent);
+
+  // Manejar la desconexión del cliente
+  req.on('close', () => {
+    console.log('Cliente desconectado de SSE para usuarios');
+    global.sseUsuariosClients = global.sseUsuariosClients.filter(client => client !== sendEvent);
+  });
+});
+
+// Ruta para insertar un nuevo registro en la tabla usuarios
 app.post('/register-user', async (req, res) => {
-  const { name, fingerprintId } = req.body;
+  const { id_usuario, nombre, id_huella } = req.body;
 
   try {
-    // Consulta SQL para insertar un nuevo registro de huella en la base de datos
+    // Consulta SQL para insertar un nuevo registro en la tabla usuarios
     const query = `
       INSERT INTO usuarios (id_usuario, nombre, id_huella)
       VALUES ($1, $2, $3) RETURNING *;
     `;
 
-    const result = await clientDB.query(query, [fingerprintId, name, `fingerprint_${fingerprintId}`]);
+    const result = await clientDB.query(query, [id_usuario, nombre, id_huella]);
+
+    // Notificar a los clientes conectados a través de SSE
+    if (global.sseUsuariosClients && global.sseUsuariosClients.length > 0) {
+      const newUser = result.rows[0];
+      global.sseUsuariosClients.forEach(client => client(newUser));
+    }
+
     res.status(200).json({ success: true, message: 'Usuario registrado correctamente', data: result.rows[0] });
   } catch (err) {
     console.error('Error al insertar en la base de datos:', err);
@@ -221,6 +262,32 @@ app.post('/register-user', async (req, res) => {
   }
 });
 
+// Endpoint para Server-Sent Events (SSE) de imágenes
+app.get('/sse-imagenes', (req, res) => {
+  // Configurar los headers para SSE
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Permitir CORS
+
+  console.log('Cliente conectado a SSE para imágenes');
+
+  // Función para enviar eventos al cliente
+  const sendEvent = (data) => {
+    res.write(`event: nueva_imagen\n`); // Nombre del evento
+    res.write(`data: ${JSON.stringify(data)}\n\n`); // Datos del evento
+  };
+
+  // Guardar la función sendEvent en una variable global para usarla en otras rutas
+  global.sseImagenesClients = global.sseImagenesClients || [];
+  global.sseImagenesClients.push(sendEvent);
+
+  // Manejar la desconexión del cliente
+  req.on('close', () => {
+    console.log('Cliente desconectado de SSE para imágenes');
+    global.sseImagenesClients = global.sseImagenesClients.filter(client => client !== sendEvent);
+  });
+});
 // Ruta para verificar una huella en la base de datos
 app.post('/verify-fingerprint', async (req, res) => {
   const { fingerprintId } = req.body;
