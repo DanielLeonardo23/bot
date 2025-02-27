@@ -47,12 +47,41 @@
     .delete-btn:hover {
       background: #cc0000;
     }
+    /* Estilo del botón */
+    .back-btn {
+      background: #00ff88;
+      color: #0d1117;
+      border: none;
+      padding: 10px 16px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background 0.3s, transform 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 20px; /* Espacio entre la tabla y el botón */
+    }
+    .back-btn:hover {
+      background: #00cc70;
+      transform: scale(1.05);
+    }
+    .boton-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
   </style>
 </head>
 <body>
 
   <h1>Gestión de Huellas</h1>
+
   <div id="tablaContainer"></div>
+
+  <!-- Botón de regreso debajo de la tabla -->
+
 
   <script>
     async function fetchUsuarios() {
@@ -90,10 +119,15 @@
         </table>
       `;
     }
+    
 
     fetchUsuarios(); // Cargar usuarios al inicio
   </script>
+    <div class="boton-container">
+        <button onclick="window.location.href='dashboard.html'" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Regresar al Dashboard
+        </button>
 
-  <script src="js/scripts2.js"></script> <!-- Asegúrate de que este archivo está en public/js -->
+  <script src="js/scripts2.js"></script>
 </body>
 </html>

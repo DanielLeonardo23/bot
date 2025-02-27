@@ -106,9 +106,23 @@
       border-radius: 5px;
       border: 2px solid #00ff88;
     }
+    .boton-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+h1 {
+  margin-bottom: 10px; /* Reduce el margen inferior del título */
+}
+
+#formContainer {
+  margin-top: 5px; /* Reduce el margen superior del contenedor */
+}
+
   </style>
 </head>
 <body>
+  
   <h1>Registro de Usuario</h1>
   <div id="formContainer">
     <button id="capturarHuellaBtn"><i class="fas fa-fingerprint"></i> Capturar Huella</button>
@@ -127,7 +141,15 @@
     <label for="id_imagen">ID de Imagen:</label>
     <input type="text" id="id_imagen" placeholder="ID de la imagen" disabled>
     <button id="registrarUsuarioBtn"><i class="fas fa-user-plus"></i> Registrar Usuario</button>
+
+    
   </div>
+  <div class="boton-container">
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Regresar al Dashboard
+    </button>
+  
+
 
    <!-- Recuadro fijo para notificaciones -->
    <div id="notifications">

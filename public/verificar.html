@@ -81,6 +81,11 @@
     th {
       background-color: #161b22;
     }
+    .boton-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
   </style>
 </head>
 <body>
@@ -92,6 +97,10 @@
     <div id="tablaContainer"></div> <!-- Aquí se mostrará la tabla de hechos -->
   </div>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <div class="boton-container">
+    <button onclick="window.location.href='dashboard.html'" class="back-btn">
+      <i class="fas fa-arrow-left"></i> Regresar al Dashboard
+    </button>
   <script src="js/scripts1.js"></script>
 </body>
 </html>
