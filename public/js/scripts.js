@@ -4,20 +4,36 @@ let lastImageData = {};
 // Función para enviar comandos al servidor
 async function sendMessage(command, targetUsername = '@Grupotwobot') {
   try {
-    const response = await fetch("/send-message", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command, targetUsername }),
-    });
+      const response = await fetch("/send-message", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ command, targetUsername }),
+      });
 
-    if (response.ok) {
-      alert(`Comando "${command}" enviado a "${targetUsername}" correctamente.`);
-    } else {
-      alert(`Error al enviar el comando "${command}".`);
-    }
+      if (response.ok) {
+          Swal.fire({
+              title: "Proceso en marcha",
+              text: "La acción se ha enviado correctamente.",
+              icon: "info",
+              timer: 2000,
+              showConfirmButton: false
+          });
+      } else {
+          Swal.fire({
+              title: "Error",
+              text: "Hubo un problema al procesar la solicitud.",
+              icon: "error",
+              confirmButtonColor: "#d33"
+          });
+      }
   } catch (error) {
-    console.error("Error:", error);
-    alert(`Error al enviar el comando "${command}".`);
+      console.error("Error:", error);
+      Swal.fire({
+          title: "Error",
+          text: "Ocurrió un error al enviar la solicitud.",
+          icon: "error",
+          confirmButtonColor: "#d33"
+      });
   }
 }
 
@@ -105,26 +121,46 @@ document.getElementById("registrarUsuarioBtn").addEventListener("click", async (
   const id_imagen = document.getElementById("id_imagen").value;
 
   if (id_usuario && nombres && id_huella && link_imagen && id_imagen) {
-    const userData = { id_usuario, nombres, id_huella, link_imagen, id_imagen };
+      const userData = { id_usuario, nombres, id_huella, link_imagen, id_imagen };
 
-    try {
-      const response = await fetch("/register-user1", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
-      });
-      const result = await response.json();
+      try {
+          const response = await fetch("/register-user1", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(userData),
+          });
+          const result = await response.json();
 
-      if (response.ok) {
-        alert("Usuario registrado exitosamente.");
-      } else {
-        alert(`Error al registrar usuario: ${result.message}`);
+          if (response.ok) {
+              Swal.fire({
+                  title: "Registro exitoso",
+                  text: "El usuario ha sido registrado correctamente.",
+                  icon: "success",
+                  confirmButtonColor: "#00ff88"
+              });
+          } else {
+              Swal.fire({
+                  title: "Error",
+                  text: result.message,
+                  icon: "error",
+                  confirmButtonColor: "#d33"
+              });
+          }
+      } catch (error) {
+          console.error("Error al registrar usuario:", error);
+          Swal.fire({
+              title: "Error",
+              text: "Hubo un problema al registrar el usuario.",
+              icon: "error",
+              confirmButtonColor: "#d33"
+          });
       }
-    } catch (error) {
-      console.error("Error al registrar usuario:", error);
-      alert("Error al registrar usuario.");
-    }
   } else {
-    alert("Por favor, complete todos los campos.");
+      Swal.fire({
+          title: "Campos incompletos",
+          text: "Por favor, complete todos los campos.",
+          icon: "warning",
+          confirmButtonColor: "#ffaa00"
+      });
   }
 });
