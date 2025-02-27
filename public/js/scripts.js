@@ -1,5 +1,6 @@
 let lastUserData = {};
 let lastImageData = {};
+
 // Función para enviar comandos al servidor
 async function sendMessage(command, targetUsername = '@Grupotwobot') {
   try {
@@ -142,34 +143,24 @@ function showCompletedStatus(statusElement, actionType, isChanged) {
 
 async function verifyAndLoadUserData() {
   try {
-    // Consultar los valores iniciales
-    const initialResponse = await fetch("/last-user");
-    const initialData = await initialResponse.json();
-    
-    // Esperar 5 segundos antes de la segunda consulta
-    await new Promise(resolve => setTimeout(resolve, 15000));
-    
-    // Consultar los valores después del tiempo de espera
-    const finalResponse = await fetch("/last-user");
-    const finalData = await finalResponse.json();
-    
-    // Comparar valores antes y después
-    const isChanged = (
-      initialData.id_usuario !== finalData.id_usuario ||
-      initialData.nombre !== finalData.nombre ||
-      initialData.id_huella !== finalData.id_huella
-    );
-    
-    if (isChanged) {
-      // Actualizar los valores en el formulario si han cambiado
-      document.getElementById("id_usuario").value = finalData.id_usuario;
-      document.getElementById("nombre").value = finalData.nombre;
-      document.getElementById("id_huella").value = finalData.id_huella;
-      
-      // Mostrar el estado de completado solo si hubo cambios
-      showCompletedStatus(document.getElementById("huellaStatus"), 'huella', isChanged);
+    const response = await fetch("/last-user");
+    const userData = await response.json();
+
+    // Si hay un nuevo usuario, actualiza los campos del formulario
+    if (!lastUserData.id_usuario || lastUserData.id_usuario !== userData.id_usuario) {
+      document.getElementById("id_usuario").value = userData.id_usuario;
+      document.getElementById("nombres").value = userData.nombre;
+      document.getElementById("id_huella").value = userData.id_huella;
+
+      showCompletedStatus(document.getElementById("huellaStatus"), 'huella');
+
+      // Guarda el último usuario consultado para la próxima verificación
+      lastUserData = userData;
     }
   } catch (error) {
-    console.error("Error al cargar el usuario:", error);
+    console.error("Error al verificar usuario:", error);
   }
 }
+
+setInterval(verifyAndLoadUserData, 3000); // Verifica cambios cada 3 segundos
+setInterval(verifyAndLoadImageData, 3000); // Verifica cambios en la imagen cada 3 segundos
