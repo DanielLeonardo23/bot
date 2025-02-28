@@ -292,7 +292,7 @@ app.post('/verify-fingerprint', async (req, res) => {
   const { fingerprintId } = req.body;
 
   try {
-    const query = 'SELECT * FROM usuarios WHERE id_usuario = $1';
+    const query = 'SELECT * FROM usuarios WHERE id_huella = $1';
     const result = await clientDB.query(query, [fingerprintId]);
 
     let estado;
