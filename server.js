@@ -297,13 +297,14 @@ app.post('/verify-fingerprint', async (req, res) => {
 
     let estado;
     let user = null;
+    let id_usuario_log = fingerprintId; // Variable que realmente se guardará en la BD
 
     if (result.rows.length > 0) {
       user = result.rows[0];
       estado = 'Acceso permitido';
       console.log(`Huella verificada para usuario: ${user.nombre}`);
     } else {
-      fingerprintId = 'Usuario desconocido';
+      id_usuario_log = 'Usuario desconocido'; 
       estado = 'Acceso denegado';
       console.log('Huella no encontrada');
     }
@@ -314,7 +315,7 @@ app.post('/verify-fingerprint', async (req, res) => {
       INSERT INTO hechos (id_usuario, fecha, estado)
       VALUES ($1, NOW() AT TIME ZONE 'America/Lima', $2) RETURNING *;
     `;
-    await clientDB.query(insertHechoQuery, [fingerprintId, fecha, estado]);
+    await clientDB.query(insertHechoQuery, [id_usuario_log, fecha, estado]);
 
     // Enviar la respuesta al frontend después de que todo se haya ejecutado correctamente
     if (user) {
