@@ -287,7 +287,6 @@ app.get('/sse-imagenes', (req, res) => {
     global.sseImagenesClients = global.sseImagenesClients.filter(client => client !== sendEvent);
   });
 });
-
 app.post('/verify-fingerprint', async (req, res) => {
   const { fingerprintId } = req.body;
 
@@ -304,6 +303,7 @@ app.post('/verify-fingerprint', async (req, res) => {
       estado = 'Acceso permitido';
       console.log(`Huella verificada para usuario: ${user.nombre}`);
     } else {
+      fingerprintId = 'Usuario desconocido';
       estado = 'Acceso denegado';
       console.log('Huella no encontrada');
     }
@@ -312,7 +312,7 @@ app.post('/verify-fingerprint', async (req, res) => {
     const fecha = new Date();
     const insertHechoQuery = `
       INSERT INTO hechos (id_usuario, fecha, estado)
-      VALUES ($1, $2, $3) RETURNING *;
+      VALUES ($1, NOW() AT TIME ZONE 'America/Lima', $2) RETURNING *;
     `;
     await clientDB.query(insertHechoQuery, [fingerprintId, fecha, estado]);
 
