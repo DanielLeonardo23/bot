@@ -288,7 +288,7 @@ app.get('/sse-imagenes', (req, res) => {
   });
 });
 app.post('/verify-fingerprint', async (req, res) => {
-  const { fingerprintId } = req.body;
+  let { fingerprintId } = req.body;
 
   try {
     console.log(`Verificando huella para ID: ${fingerprintId}`);
