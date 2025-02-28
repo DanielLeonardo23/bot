@@ -35,44 +35,46 @@ async function verificarHuella() {
       // 2️⃣ Enviar comando al ESP32 para iniciar la verificación
       await sendMessage("/verificarhuella", "@Grupotwobot");
 
-      // 3️⃣ Esperar 5 segundos antes de consultar la BD
-      setTimeout(async () => {
+      // 3️⃣ Esperar la verificación en el servidor con intentos limitados
+      let intentos = 10;  // Intentar hasta 10 veces (cada intento = 1s)
+      let resultado = null;
+      
+      while (intentos > 0) {
           try {
+              await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo entre intentos
               const response = await fetch("/verify-fingerprint", { method: "POST" });
-              const result = await response.json();
+              resultado = await response.json();
 
-              if (result.success) {
-                  // 4️⃣ Cerrar la alerta de carga y mostrar éxito
-                  Swal.fire({
-                      title: "Huella verificada",
-                      text: `Acceso concedido a ${result.user.nombre}.`,
-                      icon: "success",
-                      confirmButtonColor: "#00ff88"
-                  });
-
-                  // Mostrar datos en la tarjeta de usuario
-                  mostrarTarjetaUsuario(result.user.nombre, result.user.id_huella);
-              } else {
-                  Swal.fire({
-                      title: "Acceso denegado",
-                      text: "Huella no encontrada o no autorizada.",
-                      icon: "error",
-                      confirmButtonColor: "#d33"
-                  });
-              }
+              if (resultado.success) break; // Salir del bucle si la huella fue verificada
           } catch (error) {
-              Swal.fire({
-                  title: "Error",
-                  text: "Hubo un problema al verificar la huella.",
-                  icon: "error",
-                  confirmButtonColor: "#d33"
-              });
-              console.error(error);
+              console.error("Error al verificar huella:", error);
           }
 
-          // 5️⃣ Actualizar la tabla de hechos
-          fetchHechos();
-      }, 5000);
+          intentos--;
+      }
+
+      // 4️⃣ Cerrar la alerta de carga y mostrar resultado
+      if (resultado && resultado.success) {
+          Swal.fire({
+              title: "Huella verificada",
+              text: `Acceso concedido a ${resultado.user.nombre}.`,
+              icon: "success",
+              confirmButtonColor: "#00ff88"
+          });
+
+          // Mostrar datos en la tarjeta de usuario
+          mostrarTarjetaUsuario(resultado.user.nombre, resultado.user.id_huella);
+      } else {
+          Swal.fire({
+              title: "Acceso denegado",
+              text: "Huella no encontrada o no autorizada.",
+              icon: "error",
+              confirmButtonColor: "#d33"
+          });
+      }
+
+      // 5️⃣ Actualizar la tabla de hechos
+      fetchHechos();
 
   } catch (error) {
       Swal.fire({
@@ -84,6 +86,7 @@ async function verificarHuella() {
       console.error(error);
   }
 }
+
 
 // ✅ Asociar la verificación al botón
 document.getElementById("verificarHuellaBtn").addEventListener("click", verificarHuella);
