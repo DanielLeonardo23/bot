@@ -308,12 +308,12 @@ app.post('/verify-fingerprint', async (req, res) => {
       estado = 'Acceso denegado';
       console.log('Huella no encontrada');
     }
-
+    Date = new Date();
     const insertHechoQuery = `
       INSERT INTO hechos (id_usuario, fecha, estado)
-      VALUES ($1, NOW() AT TIME ZONE 'America/Lima', $2) RETURNING *;
+      VALUES ($1,$2,$3) RETURNING *;
     `;
-    await clientDB.query(insertHechoQuery, [id_usuario_log, estado]);
+    await clientDB.query(insertHechoQuery, [id_usuario_log,Date,estado]);
 
     // Enviar la respuesta al frontend después de que todo se haya ejecutado correctamente
     if (user) {
