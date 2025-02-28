@@ -424,7 +424,7 @@ app.get('/userimg', async (req, res) => {
 // Obtener todos los hechos
 app.get('/hechos', async (req, res) => {
   try {
-    const result = await clientDB.query('SELECT * FROM hechos');
+    const result = await clientDB.query('SELECT * FROM hechos ORDER BY "id_hecho" asc');
     res.status(200).json(result.rows);
   } catch (error) {
     console.error('Error al obtener hechos:', error);

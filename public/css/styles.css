@@ -83,3 +83,29 @@ body {
     font-size: 14px;
     z-index: 1000;
   }
+  .pagination {
+    margin-top: 15px;
+    text-align: center;
+  }
+  
+  .pagination button {
+    margin: 5px;
+    padding: 8px 12px;
+    border: none;
+    background-color: #00ff88;
+    color: #0d1117;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  
+  .pagination button:hover {
+    background-color: #00cc6a;
+  }
+  
+  .pagination button.active {
+    background-color: #007d52;
+    color: white;
+  }
+  
