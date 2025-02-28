@@ -297,31 +297,38 @@ app.post('/verify-fingerprint', async (req, res) => {
     const result = await clientDB.query(query, [fingerprintId]);
 
     let estado;
+    let user = null;
+
     if (result.rows.length > 0) {
-      const user = result.rows[0];
+      user = result.rows[0];
       estado = 'Acceso permitido';
       console.log(`Huella verificada para usuario: ${user.nombre}`);
-      res.status(200).json({ success: true, message: `Huella verificada: ${user.nombre}` });
     } else {
       estado = 'Acceso denegado';
       console.log('Huella no encontrada');
-      res.status(404).json({ success: false, message: 'Huella no encontrada' });
     }
 
-    // Insertar en la tabla hechos
+    // Insertar en la tabla hechos antes de responder
     const fecha = new Date();
     const insertHechoQuery = `
       INSERT INTO hechos (id_usuario, fecha, estado)
       VALUES ($1, $2, $3) RETURNING *;
     `;
-    const hechoResult = await clientDB.query(insertHechoQuery, [fingerprintId, fecha, estado]);
-    console.log(`Registro de hecho insertado: ${JSON.stringify(hechoResult.rows[0])}`);
+    await clientDB.query(insertHechoQuery, [fingerprintId, fecha, estado]);
+
+    // Enviar la respuesta al frontend después de que todo se haya ejecutado correctamente
+    if (user) {
+      return res.status(200).json({ success: true, message: `Huella verificada: ${user.nombre}`, user });
+    } else {
+      return res.status(404).json({ success: false, message: 'Huella no encontrada' });
+    }
 
   } catch (err) {
     console.error('Error al verificar la huella:', err);
-    res.status(500).json({ success: false, error: 'Error al verificar la huella' });
+    return res.status(500).json({ success: false, error: 'Error al verificar la huella' });
   }
 });
+
 
 // Ruta para eliminar una huella
 app.delete('/delete-fingerprint/:id', async (req, res) => {
