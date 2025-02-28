@@ -20,7 +20,7 @@ async function sendMessage(command, targetUsername = '@Grupotwobot') {
 // ✅ Función para verificar huella
 async function verificarHuella() {
   try {
-      // 1️⃣ Mostrar alerta de carga sin botones
+      // 1️⃣ Mostrar alerta de carga
       Swal.fire({
           title: "Verificando huella...",
           text: "Por favor, coloque su dedo en el sensor...",
@@ -32,49 +32,47 @@ async function verificarHuella() {
           }
       });
 
-      // 2️⃣ Enviar comando al ESP32 para iniciar la verificación
+      // 2️⃣ Enviar comando al ESP32 y esperar respuesta
       await sendMessage("/verificarhuella", "@Grupotwobot");
 
-      // 3️⃣ Esperar la verificación en el servidor con intentos limitados
-      let intentos = 10;  // Intentar hasta 10 veces (cada intento = 1s)
-      let resultado = null;
-      
-      while (intentos > 0) {
+      // 3️⃣ Esperar 5 segundos antes de consultar el último registro de la BD
+      setTimeout(async () => {
           try {
-              await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo entre intentos
-              const response = await fetch("/verify-fingerprint", { method: "POST" });
-              resultado = await response.json();
+              const response = await fetch("/ultimo-hecho"); // Obtenemos solo el último hecho
+              const result = await response.json();
 
-              if (resultado.success) break; // Salir del bucle si la huella fue verificada
+              if (result.success) {
+                  // 4️⃣ Cerrar la alerta de carga y mostrar éxito
+                  Swal.fire({
+                      title: "Huella verificada",
+                      text: `Acceso concedido a ${result.hecho.id_usuario}.`,
+                      icon: "success",
+                      confirmButtonColor: "#00ff88"
+                  });
+
+                  // Mostrar datos en la tarjeta de usuario
+                  mostrarTarjetaUsuario(result.hecho.id_usuario, result.hecho.estado);
+              } else {
+                  Swal.fire({
+                      title: "Acceso denegado",
+                      text: "Huella no encontrada o no autorizada.",
+                      icon: "error",
+                      confirmButtonColor: "#d33"
+                  });
+              }
           } catch (error) {
-              console.error("Error al verificar huella:", error);
+              Swal.fire({
+                  title: "Error",
+                  text: "Hubo un problema al verificar la huella.",
+                  icon: "error",
+                  confirmButtonColor: "#d33"
+              });
+              console.error(error);
           }
 
-          intentos--;
-      }
-
-      // 4️⃣ Cerrar la alerta de carga y mostrar resultado
-      if (resultado && resultado.success) {
-          Swal.fire({
-              title: "Huella verificada",
-              text: `Acceso concedido a ${resultado.user.nombre}.`,
-              icon: "success",
-              confirmButtonColor: "#00ff88"
-          });
-
-          // Mostrar datos en la tarjeta de usuario
-          mostrarTarjetaUsuario(resultado.user.nombre, resultado.user.id_huella);
-      } else {
-          Swal.fire({
-              title: "Acceso denegado",
-              text: "Huella no encontrada o no autorizada.",
-              icon: "error",
-              confirmButtonColor: "#d33"
-          });
-      }
-
-      // 5️⃣ Actualizar la tabla de hechos
-      fetchHechos();
+          // 5️⃣ Actualizar la tabla de hechos (todas las filas)
+          fetchHechos();
+      }, 5000);
 
   } catch (error) {
       Swal.fire({

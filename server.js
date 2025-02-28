@@ -420,6 +420,21 @@ app.get('/hechos', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener hechos' });
   }
 });
+app.get('/ultimo-hecho', async (req, res) => {
+  try {
+    const result = await clientDB.query('SELECT * FROM hechos ORDER BY fecha DESC LIMIT 1');
+    
+    if (result.rows.length > 0) {
+      res.status(200).json({ success: true, hecho: result.rows[0] });
+    } else {
+      res.status(404).json({ success: false, message: "No hay registros en la tabla de hechos" });
+    }
+  } catch (error) {
+    console.error('Error al obtener el último hecho:', error);
+    res.status(500).json({ error: 'Error al obtener el último hecho' });
+  }
+});
+
 
 
 
