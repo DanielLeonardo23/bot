@@ -61,43 +61,90 @@ function mostrarTarjetaUsuario(nombre, id_huella) {
   `;
 }
 
-// ✅ Obtener y Mostrar la Tabla de Hechos
+let hechosData = [];  // Almacenará todos los hechos obtenidos del backend
+let currentPage = 1;  // Página actual
+const itemsPerPage = 10;  // Número de registros por página
+
+// ✅ Función para obtener los hechos desde el backend
 async function fetchHechos() {
   try {
       const response = await fetch("/hechos");
-      const hechos = await response.json();
-      const tablaContainer = document.getElementById("tablaContainer");
-
-      tablaContainer.innerHTML = `
-          <h2>Hechos</h2>
-          <table>
-              <thead>
-                  <tr>
-                      <th>ID Hecho</th>
-                      <th>ID Usuario</th>
-                      <th>Fecha</th>
-                      <th>Estado</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  ${hechos.map(hecho => `
-                      <tr>
-                          <td>${hecho.id_hecho}</td>
-                          <td>${hecho.id_usuario}</td>
-                          <td>${new Date(hecho.fecha).toLocaleString()}</td>
-                          <td>${hecho.estado}</td>
-                      </tr>
-                  `).join('')}
-              </tbody>
-          </table>
-      `;
+      hechosData = await response.json(); // Guardamos los datos globalmente
+      renderTable(currentPage); // Mostramos la primera página
   } catch (error) {
-      const tablaContainer = document.getElementById("tablaContainer");
-      tablaContainer.innerHTML = '<p>Error al obtener los hechos.</p>';
+      document.getElementById("tablaContainer").innerHTML = '<p>Error al obtener los hechos.</p>';
       console.error(error);
   }
 }
 
-// ✅ Cargar la tabla de hechos al cargar la página
+// ✅ Función para renderizar la tabla con la paginación
+function renderTable(page) {
+  const tablaContainer = document.getElementById("tablaContainer");
+  const start = (page - 1) * itemsPerPage;  // Índice de inicio
+  const end = start + itemsPerPage;  // Índice de fin
+  const hechosPagina = hechosData.slice(start, end);  // Extraer los datos de la página actual
+
+  tablaContainer.innerHTML = `
+      <h2>Hechos</h2>
+      <table>
+          <thead>
+              <tr>
+                  <th>ID Hecho</th>
+                  <th>ID Usuario</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+              </tr>
+          </thead>
+          <tbody>
+              ${hechosPagina.map(hecho => `
+                  <tr>
+                      <td>${hecho.id_hecho}</td>
+                      <td>${hecho.id_usuario}</td>
+                      <td>${new Date(hecho.fecha).toLocaleString()}</td>
+                      <td>${hecho.estado}</td>
+                  </tr>
+              `).join('')}
+          </tbody>
+      </table>
+      <div id="paginationControls" class="pagination"></div>
+  `;
+
+  renderPaginationControls();  // Actualizar los controles de paginación
+}
+
+// ✅ Función para crear los botones de paginación
+function renderPaginationControls() {
+  const totalPages = Math.ceil(hechosData.length / itemsPerPage);
+  const paginationControls = document.getElementById("paginationControls");
+
+  paginationControls.innerHTML = ""; // Limpiar los controles previos
+
+  // Botón "Anterior"
+  if (currentPage > 1) {
+      paginationControls.innerHTML += `<button onclick="changePage(${currentPage - 1})">⬅️ Anterior</button>`;
+  }
+
+  // Números de página
+  for (let i = 1; i <= totalPages; i++) {
+      paginationControls.innerHTML += `
+          <button onclick="changePage(${i})" ${i === currentPage ? 'class="active"' : ''}>${i}</button>
+      `;
+  }
+
+  // Botón "Siguiente"
+  if (currentPage < totalPages) {
+      paginationControls.innerHTML += `<button onclick="changePage(${currentPage + 1})">Siguiente ➡️</button>`;
+  }
+}
+
+// ✅ Función para cambiar de página
+function changePage(page) {
+  if (page < 1 || page > Math.ceil(hechosData.length / itemsPerPage)) return;
+  currentPage = page;
+  renderTable(currentPage);
+}
+
+// ✅ Cargar la tabla al iniciar la página
 fetchHechos();
+
 
