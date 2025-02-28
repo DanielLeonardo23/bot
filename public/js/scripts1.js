@@ -31,47 +31,8 @@ async function verificarHuella() {
               Swal.showLoading();
           }
       });
-
       // 2️⃣ Enviar comando al ESP32 y esperar su procesamiento
-      await sendMessage("/verificarhuella", "@Grupotwobot");  // ⚠ Espera la respuesta antes de continuar
-
-      // 3️⃣ Ahora consultamos el backend para obtener la última verificación en la BD
-      try {
-          const response = await fetch("/ultimo-hecho"); // ✅ Obtenemos solo el último registro de hechos
-          const result = await response.json();
-
-          if (result.success) {
-              // 4️⃣ Cerrar la alerta y mostrar éxito
-              Swal.fire({
-                  title: "Huella verificada",
-                  text: `Acceso concedido a ${result.hecho.id_usuario}.`,
-                  icon: "success",
-                  confirmButtonColor: "#00ff88"
-              });
-
-              // Mostrar datos en la tarjeta de usuario
-              mostrarTarjetaUsuario(result.hecho.id_usuario, result.hecho.estado);
-          } else {
-              Swal.fire({
-                  title: "Acceso denegado",
-                  text: "Huella no encontrada o no autorizada.",
-                  icon: "error",
-                  confirmButtonColor: "#d33"
-              });
-          }
-      } catch (error) {
-          Swal.fire({
-              title: "Error",
-              text: "Hubo un problema al verificar la huella.",
-              icon: "error",
-              confirmButtonColor: "#d33"
-          });
-          console.error(error);
-      }
-
-      // 5️⃣ Actualizar la tabla de hechos (todas las filas)
-      fetchHechos();
-
+      sendMessage("/verificarhuella", "@Grupotwobot");  // ⚠ Espera la respuesta antes de continuar
   } catch (error) {
       Swal.fire({
           title: "Error",
@@ -137,8 +98,6 @@ async function fetchHechos() {
   }
 }
 
-// ✅ Actualizar la tabla de hechos cada 5 segundos
-setInterval(fetchHechos, 5000);
 // ✅ Cargar la tabla de hechos al cargar la página
 fetchHechos();
 
